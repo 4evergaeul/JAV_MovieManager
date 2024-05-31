@@ -1,0 +1,22 @@
+.director-search-bar {
+    width: 200px;
+}
+
+.director-button {
+    margin: 5px;
+    width: 250px;
+    height: 60px;
+}
+
+.director-span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    width: 220px;
+    text-overflow: ellipsis;
+}
+
+.director-list {
+    margin: 5px;
+}

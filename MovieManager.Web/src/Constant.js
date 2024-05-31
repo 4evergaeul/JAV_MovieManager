@@ -1,0 +1,4 @@
+export const NAME_TAG_EACH_PAGE = 63
+export const MOVIE_CARD_EACH_PAGE_LARGE_SCREEN = 20
+export const MOVIE_CARD_EACH_PAGE_SMALL_SCREEN = 4
+export const ACTOR_CARD_EACH_PAG = 40

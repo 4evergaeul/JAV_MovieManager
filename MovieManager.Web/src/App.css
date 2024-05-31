@@ -1,0 +1,57 @@
+#components-layout-demo-top-side-2 .logo {
+  float: left;
+  width: 120px;
+  height: 31px;
+  margin: 16px 24px 16px 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ant-row-rtl #components-layout-demo-top-side-2 .logo {
+  float: right;
+  margin: 16px 0 16px 24px;
+}
+
+.side {
+  background: #fff;
+  height: 875px;
+  overflow-y: auto;
+}
+
+.content {
+  background: #fff;
+  height: 100%;
+  overflow-y: hidden;
+}
+
+.ant-layout-sider-children {
+  height: 100%;
+}
+
+.rct-node {
+  margin: 2px 2px 0px 25px;
+}
+
+.rct-title {
+  margin-left: 10px;
+  word-wrap: break-word;
+  line-height: normal;
+}
+
+.actor-sidebar-slider {
+  width: 250px;
+  margin:  5px 0px 5px 0px !important;
+}
+
+.actor-sidebar-label {
+  margin: 5px 0px 0px 0px;
+  font-weight: bold;
+}
+
+.sidebar {
+  margin-left: 25px;
+}
+
+.like-checkbox {
+  margin-top: 15px !important;
+  margin-left: 22px !important;
+}

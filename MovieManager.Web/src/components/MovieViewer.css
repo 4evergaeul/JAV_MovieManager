@@ -1,0 +1,75 @@
+.ant-descriptions-item-label {
+    padding: 4px 8px !important;
+}
+
+.ant-descriptions-item-content {
+    padding: 4px 8px !important;
+}
+
+.poster-card {
+    margin: 5px;
+    display: inline-block;
+    width: 190px;
+    height: 400px;
+    vertical-align: top;
+}
+
+.fanart-card {
+    margin: 5px;
+    width: 600px;
+    height: 402px;
+    vertical-align: top;
+}
+
+.poster-image {
+    /* width: 240px;
+    height: 350px; */
+    width: 180px;
+    height: 262px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fanart-image {
+    width: 600px;
+    height: 402px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.movie-list {
+    margin-top: 10px;
+}
+
+.header-left {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 10px;
+}
+
+.header-right {
+    margin-right: 48px;
+    margin-top: 3px;
+    display: inline-block;
+    float: right;
+}
+
+.ant-card-meta-description {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.header-element-right {
+    vertical-align: middle;
+    margin: 2px
+}
+
+.modal-button {
+    margin: 2px;
+}
+
+.movie-search-bar {
+    width: 200px;
+}

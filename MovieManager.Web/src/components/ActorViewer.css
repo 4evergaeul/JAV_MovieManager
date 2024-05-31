@@ -1,0 +1,66 @@
+.actor-search-bar {
+    width: 200px;
+}
+
+.actor-button {
+    margin: 5px;
+    width: 250px;
+    height: 60px;
+}
+
+.actor-list {
+    margin: 5px;
+}
+
+
+.header-element-right {
+    vertical-align: middle;
+    margin: 2px
+}
+
+.actor-poster-card {
+    margin: 5px;
+    display: inline-block;
+    width: 190px;
+    height:250px;
+    vertical-align: top;
+}
+  
+.actor-image {
+    width: 100%; /* Ensure the image covers the container's width */
+    height: 180px; /* Set the desired height of the image */
+    object-position: top; /* Align the image to the top */
+    object-fit: cover;
+    
+}
+
+.actor-details .ant-modal-body {
+    padding: 0;
+    overflow: hidden; /* Ensure that floating elements are contained within the modal body */
+}
+
+.left-container {
+    float: left;
+    width: 500px; /* Adjust the width as needed */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin-right: 20px; /* Space between left and right containers */
+    margin-left: 20px;
+}
+
+.right-container {
+    float: left;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.actor-details .actor-detail-card {
+    width: 450px;
+    height: 600px;
+}
+
+.actor-details .actor-detail-card img {
+    width: 450px;
+    height: 600px;
+    object-fit: cover; /* Ensures the image is scaled and cropped to fit the dimensions */
+    display: block; /* Ensures the image is a block element */
+    margin: 0 auto; /* Centers the image horizontally */
+}
