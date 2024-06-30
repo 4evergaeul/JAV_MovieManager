@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MovieManager.BusinessLogic;
 using MovieManager.ClassLibrary;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace MovieManager.Endpoint.Controllers
 {
@@ -13,9 +15,9 @@ namespace MovieManager.Endpoint.Controllers
     {
         private string badRequestMessage = "Value cannot be null!";
         private string notFoundMessage = "No User Settings found!";
-        private IOptions<UserSettings> _config;
+        private UserSettingsService _config;
 
-        public UserSettingsController(IOptions<UserSettings> config)
+        public UserSettingsController(UserSettingsService config)
         {
             _config = config;
         }
@@ -24,11 +26,11 @@ namespace MovieManager.Endpoint.Controllers
         [Route("/usersettings")]
         public ActionResult Get()
         {
-            if(_config.Value == null)
+            if(_config == null)
             {
                 return NotFound(notFoundMessage);
             }
-            UserSettings result = _config.Value;
+            UserSettings result = _config.GetUserSettings();
             return Ok(result);
         }
 
@@ -40,12 +42,7 @@ namespace MovieManager.Endpoint.Controllers
             {
                 return BadRequest(badRequestMessage);
             }
-            var f = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
-            var json = System.IO.File.ReadAllText(f);
-            dynamic oldUserSettings = JsonConvert.DeserializeObject(json);
-            oldUserSettings.UserSettings.MovieDirectory = userSettings.MovieDirectory;
-            string output = JsonConvert.SerializeObject(oldUserSettings, Formatting.Indented);
-            System.IO.File.WriteAllText(f, output);
+            _config.SetUserSettings(userSettings);
             return Ok(userSettings);
         }
     }

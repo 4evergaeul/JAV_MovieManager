@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MovieManager.Endpoint
@@ -32,7 +34,8 @@ namespace MovieManager.Endpoint
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>().UseUrls("http://localhost:5100");
+                    var endpointHost = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["EndpointHost"];
+                    webBuilder.UseStartup<Startup>().UseUrls(endpointHost);
                 });
     }
 }

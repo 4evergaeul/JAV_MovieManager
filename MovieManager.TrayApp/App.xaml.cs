@@ -1,8 +1,11 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Extensions.Configuration;
+using MovieManager.Data;
 using MovieManager.Endpoint;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
@@ -42,29 +45,21 @@ namespace MovieManager.TrayApp
                 KillProcessAndChildrens(p.Id);
             }
             base.OnExit(e);
+            Process.GetCurrentProcess().Kill();
         }
 
         private void ExecuteCommands()
         {
-            var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + @"serve C:\Projects\MovieManager\MovieManager.Web\build");
-            var locations = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("UserSettings")["MovieDirectory"].Split(",").ToList();
-            locations.AddRange(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("UserSettings")["ActorFiguresAllDirectory"].Split(",").ToList());
-            var disks = new HashSet<string>();
-            foreach(var l in locations)
+            var webAppLocation = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppDirectory"];
+            var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + @$"serve {webAppLocation}");
+            
+            var currentPort = int.Parse(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["HttpServerStartPort"]);
+            for (char c = 'A'; c <= 'Z'; c++)
             {
-                var disk = l.Trim().Substring(0, 1);
-                if (!disks.Contains(disk))
-                {
-                    disks.Add(disk);
-                }
-            }
-            var currentPort = STARTPORT;
-            foreach (var disk in disks)
-            {
-                var info = new ProcessStartInfo("cmd.exe", "/K " + $"http-server {disk}:/ -p {currentPort}");
+                var info = new ProcessStartInfo("cmd.exe", "/K " + $"http-server {c}:/ -p {currentPort}");
                 info.CreateNoWindow = true;
-                Process.Start(info);
-                Thread.Sleep(1000);
+                httpServerProcesses.Add(Process.Start(info));
+                Thread.Sleep(100);
                 currentPort++;
             }
 
@@ -96,5 +91,7 @@ namespace MovieManager.TrayApp
                 }
             }
         }
+
+
     }
 }

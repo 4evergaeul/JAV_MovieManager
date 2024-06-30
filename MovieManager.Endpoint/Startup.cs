@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MovieManager.BusinessLogic;
 using MovieManager.ClassLibrary;
+using MovieManager.ClassLibrary.Settings;
 using Serilog;
 using System;
 
@@ -22,8 +23,8 @@ namespace MovieManager.Endpoint
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddOptions();
-            services.Configure<UserSettings>(Configuration.GetSection("UserSettings"));
             services.AddControllers();
             services.AddTransient<MovieService>();
             services.AddTransient<PotPlayerService>();
@@ -34,6 +35,7 @@ namespace MovieManager.Endpoint
             services.AddTransient<TagService>();
             services.AddTransient<DirectorService>();
             services.AddTransient<UtilityService>();
+            services.AddSingleton<UserSettingsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

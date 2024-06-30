@@ -182,7 +182,7 @@ export function scanAndAddNewMovies(days) {
         if (!resp.ok) {
             throw resp;
         }
-        return resp;
+        return resp.json();;
     }).then(resp => {
         return resp;
     }).catch(error => {
@@ -198,7 +198,7 @@ export function deleteMovies() {
         if (!resp.ok) {
             throw resp;
         }
-        return resp;
+        return resp.json();;
     }).then(resp => {
         return resp;
     }).catch(error => {
@@ -567,7 +567,7 @@ export function getUserSettings() {
 }
 
 export function updateUserSettings(userSettings) {
-    return fetch("http://localhost:5100/playlist/append/default", {
+    return fetch("http://localhost:5100/usersettings/update", {
         method: "PUT",
         mode: "cors",
         body: JSON.stringify(userSettings),

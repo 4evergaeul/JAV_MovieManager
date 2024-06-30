@@ -2,7 +2,7 @@ import './App.css';
 import 'antd/dist/antd.css'
 import { getAllActorNames, getActorsByRanges, getMoivesByFilter, getMovieYears, getMostRecentMovies, getLikedMovies, getLikedActors, getAllGenreNames, getAllTagNames, getLikedGenres, getLikedTags, getAllDirectorNames } from './services/DataService.js';
 import { useEffect, useRef, useState } from "react";
-import { Layout, Menu, Slider, Space, Button, Checkbox } from 'antd';
+import { Layout, Menu, Slider, Space, Button, Checkbox, message } from 'antd';
 import { UserOutlined, GroupOutlined, TagOutlined, CalendarOutlined } from '@ant-design/icons';
 import CheckboxTree from "react-checkbox-tree";
 import MovieViewer from './components/MovieViewer';
@@ -51,13 +51,13 @@ function App() {
   }
 
   useEffect(() => {
-    if (allActors.length === 0) {
+    if (allActors?.length === 0) {
       getAllActorNames().then(resp => {
           let results = resp ? getResponses(resp) : [];
           setAllActors(results);
       });
     }
-    if (allGenres.length === 0) {
+    if (allGenres?.length === 0) {
       getAllGenreNames().then(resp => {
         if(resp) {
           let results = resp ? getResponses(resp) : [];
@@ -65,28 +65,31 @@ function App() {
         }
       });
     }
-    if (allTags.length === 0) {
+    if (allTags?.length === 0) {
       getAllTagNames().then(resp => {
         let results = resp ? getResponses(resp) : [];
         setAllTags(results);
       });
     }
-    if (allDirectors.length === 0) {
+    if (allDirectors?.length === 0) {
       getAllDirectorNames().then(resp => {
         let results = resp ? getResponses(resp) : [];
         setAllDirectors(results);
       });
     }
-    if (allYears.length === 0) {
+    if (allYears?.length === 0) {
       getMovieYears().then(resp => {
         let results = resp ? getResponses(resp) : [];
         setAllYears(results);
       });
     }
-    if (mostRecentMovies.length === 0) {
+    if (mostRecentMovies?.length === 0) {
       getMostRecentMovies().then(resp => {
         setMostRecentMovies(resp);
         movieViewer?.current?.initializeMovies(resp);
+        if(!resp) {
+          message.info("没有找到影片，请到设置添加影片！");
+        }
       });
     }
   }, [allActors], [allGenres], [allTags], [allDirectors], [allYears], [mostRecentMovies]);
@@ -200,7 +203,7 @@ function App() {
 
   function onActorFilterApply() {
     getActorsByRanges(heightRange[0], heightRange[1], cupMarks[cupRange[0]], cupMarks[cupRange[1]], ageUpper).then(
-      resp => {
+      async resp => {
         let actorNames = resp;
         actorViewer?.current?.initializeActors(actorNames);
       }).catch(error => console.log(error));

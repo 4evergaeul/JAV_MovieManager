@@ -19,9 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="App.config">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
     <None Update="MovieDb.db">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>

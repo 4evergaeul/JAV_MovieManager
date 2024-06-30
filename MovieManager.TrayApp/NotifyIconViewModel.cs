@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
@@ -17,7 +18,8 @@ namespace MovieManager.TrayApp
             get
             {
                 // May need change port when running on new machine
-                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", "http://localhost:3000/") };
+                var webAppHost = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppHost"];
+                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", webAppHost) };
             }
         }
 

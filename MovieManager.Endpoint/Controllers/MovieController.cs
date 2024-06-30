@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Options;
 using MovieManager.BusinessLogic;
 using MovieManager.ClassLibrary;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,12 +17,12 @@ namespace MovieManager.Endpoint.Controllers
         private string notFoundMessage = "No Movies found!";
         private MovieService _movieService;
         private XmlProcessor _xmlProcessor;
-        private IOptions<UserSettings> _config;
+        private UserSettingsService _config;
 
         public MovieController(
             MovieService movieService,
             XmlProcessor xmlProcessor,
-            IOptions<UserSettings> config)
+            UserSettingsService config)
         {
             _movieService = movieService;
             _xmlProcessor = xmlProcessor;
@@ -155,13 +157,16 @@ namespace MovieManager.Endpoint.Controllers
         public async Task<ActionResult> AddNewMoviesAsync(int days)
         {
             var scanner = new FileScanner(_xmlProcessor);
-            var movieDir = _config.Value.MovieDirectory.Split(",");
+            var movieDir = _config.GetUserSettings().MovieDirectory.Split("|");
+            var prevMoviesCount = _movieService.GetMoviesCount();
+            List<Movie> newMovies = new List<Movie>();
+           
             foreach (var md in movieDir)
             {
-                var m = scanner.ScanFiles(md, days);
+                var m = scanner.ScanFiles(md.Trim(), days);
                 await _movieService.InsertMovies(m, false, true);
             }
-            return Ok();
+            return Ok(_movieService.GetMoviesCount() - prevMoviesCount);
         }
 
         [HttpDelete]
@@ -169,7 +174,7 @@ namespace MovieManager.Endpoint.Controllers
         public ActionResult DeleteNotExistMovies()
         {
             var scanner = new FileScanner(_xmlProcessor);
-            var movieDir = _config.Value.MovieDirectory;
+            var movieDir = _config.GetUserSettings().MovieDirectory;
             var m = scanner.ScanFilesForImdbId(movieDir);
             return Ok(_movieService.DeleteRemovedMovies(m));
         }

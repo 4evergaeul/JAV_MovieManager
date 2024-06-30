@@ -19,7 +19,6 @@ namespace MovieManager.BusinessLogic
         private UtilityService _utilityService;
 
         public MovieService(ScrapeService scrapeService,
-            IOptions<UserSettings> config,
             UtilityService utilityService)
         {
             _scrapeService = scrapeService;
@@ -120,6 +119,24 @@ namespace MovieManager.BusinessLogic
                 {
                     var movies = context.Movies.ToList();
                     result = BuildMovieViewModel(movies);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occurs when getting all movies. \n\r");
+                Log.Error(ex.ToString());
+            }
+            return result;
+        }
+
+        public int GetMoviesCount()
+        {
+            var result = 0;
+            try
+            {
+                using (var context = new DatabaseContext())
+                {                   
+                    result = context.Movies.Count();
                 }
             }
             catch (Exception ex)

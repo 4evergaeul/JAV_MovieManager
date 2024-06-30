@@ -15,10 +15,10 @@ namespace MovieManager.BusinessLogic
 {
     public class ActorService
     {
-        private IOptions<UserSettings> _config;
+        private UserSettingsService _config;
         private UtilityService _utilityService;
 
-        public ActorService(IOptions<UserSettings> config, 
+        public ActorService(UserSettingsService config, 
             UtilityService utilityService)
         {
             CultureInfo PronoCi = new CultureInfo(2052);
@@ -227,13 +227,21 @@ namespace MovieManager.BusinessLogic
                             {
                                 var newKvp = new KeyValuePair<Actor, bool>(keyValuePairs[j].Key, true);
                                 keyValuePairs[j] = newKvp;
-                                var actor = keyValuePairs[j].Key;                                
-                                var figureSmallPath = Directory.EnumerateFiles(_config.Value.ActorFiguresDMMDirectory, $"AI-Fix-{actor.Name}.jpg", SearchOption.AllDirectories).FirstOrDefault();
-                                if (string.IsNullOrEmpty(figureSmallPath))
+                                var actor = keyValuePairs[j].Key;
+                                var figureSmallPath = "";
+                                var figureLargePath = "";
+                                if (!string.IsNullOrEmpty(_config.GetUserSettings().ActorFiguresDMMDirectory))
                                 {
-                                    figureSmallPath = Directory.EnumerateFiles(_config.Value.ActorFiguresAllDirectory, $"{actor.Name}.jpg", SearchOption.AllDirectories).FirstOrDefault();
+                                    figureSmallPath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresDMMDirectory, $"AI-Fix-{actor.Name}.jpg", SearchOption.AllDirectories).FirstOrDefault();
                                 }
-                                var figureLargePath = Directory.EnumerateFiles(_config.Value.ActorFiguresAllDirectory, $"{actor.Name}.jpg", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                                if (!string.IsNullOrEmpty(_config.GetUserSettings().ActorFiguresAllDirectory))
+                                {
+                                    if (string.IsNullOrEmpty(figureSmallPath))
+                                    {
+                                        figureSmallPath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresAllDirectory, $"{actor.Name}.jpg", SearchOption.AllDirectories).FirstOrDefault();
+                                    }
+                                    figureLargePath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresAllDirectory, $"{actor.Name}.jpg", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                                }
                                 result.Add(new ActorViewModel()
                                 {
                                     Cup = actor.Cup,

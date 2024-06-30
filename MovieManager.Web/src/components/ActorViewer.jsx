@@ -4,14 +4,14 @@ import { Pagination, Button, Spin, Modal, Descriptions, Input, message, Card } f
 import { HeartFilled, HeartOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { getActorByName, likeActor, getMoivesByFilter, createPotPlayerPlayListByActors, getActorByNames } from "../services/DataService";
 import MovieViewer from "./MovieViewer";
-import { ACTOR_CARD_EACH_PAG } from "../Constant";
+import { ACTOR_CARD_EACH_PAG as ACTOR_CARD_EACH_PAGE } from "../Constant";
 
 const { Search } = Input;
 const { Meta } = Card;
 
 const ActorViewer = forwardRef((props, ref) => {
     const [minValue, setMinValue] = useState(0);
-    const [maxValue, setMaxValue] = useState(ACTOR_CARD_EACH_PAG);
+    const [maxValue, setMaxValue] = useState(ACTOR_CARD_EACH_PAGE);
     const [currentPage, setCurrentPage] = useState(-1);
     const [actorNames, setActorNames] = useState([]);
     const [actor, setActor] = useState(null);
@@ -22,9 +22,11 @@ const ActorViewer = forwardRef((props, ref) => {
     const [likeFlag, setLikeFlag] = useState(0);
 
     const movieViewer = useRef();
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     useImperativeHandle(ref, () => ({
         initializeActors(actorNames) {
+            resetViewer();
             init(actorNames);
         },
         setIsLoading() {
@@ -33,32 +35,44 @@ const ActorViewer = forwardRef((props, ref) => {
     }));
 
     useEffect(() => {
-        if (actorNames.length > 0) {
-          setIsLoading(true);
-          getActorByNames(actorNames.slice(minValue, maxValue))
-            .then((resp) => {
-              setCurrentPageActorCardDetails(resp);
-              setIsLoading(false);
-            })
-            .catch((error) => {
-              console.log(error);
-              setIsLoading(false);
-            });
-        }
-      }, [currentPage]);
+        const fetchActorDetails = async () => {
+            if (actorNames.length > 0) {
+                setIsLoading(true);
+                try {
+                    const resp = await getActorByNames(actorNames.slice(minValue, maxValue));
+                    setCurrentPageActorCardDetails(resp);
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchActorDetails();
+    }, [actorNames, minValue, maxValue]);
+
+    function resetViewer() {
+        setCurrentPage(-1);
+        setMinValue(0);
+        setMaxValue(ACTOR_CARD_EACH_PAGE);
+        setActorNames([]);
+        setActor(null);
+        setCurrentPageActorCardDetails([]);
+        setVisible(false);
+        setIsLikeLoading(false);
+        setLikeFlag(0);
+    }
 
     function init(actorNames) {
-        setCurrentPage(-1)
         setMinValue(0);
-        setMaxValue(ACTOR_CARD_EACH_PAG);
         setActorNames(actorNames);
-        setCurrentPage(1)
-        setIsLoading(false);
+        setCurrentPage(1);
     }
 
     function handleChange(value) {
-        setMinValue((value - 1) * ACTOR_CARD_EACH_PAG);
-        setMaxValue(value * ACTOR_CARD_EACH_PAG);
+        setMinValue((value - 1) * ACTOR_CARD_EACH_PAGE);
+        setMaxValue(value * ACTOR_CARD_EACH_PAGE);
         setCurrentPage(value);
     };
 
@@ -76,14 +90,19 @@ const ActorViewer = forwardRef((props, ref) => {
         });
     }
 
-    function onSearch(value) {
+    async function onSearch(value) {
         setIsLoading(true);
-        setCurrentPage(-1);
-        getActorByName(value).then(resp => {
-            let actors = resp ? resp.map(x => x.name) : [];
+        try {
+            const resp = await getActorByName(value);
+            const actors = resp ? resp.map(x => x.name) : [];
+            resetViewer()
+            await sleep(1000);
             init(actors);
-            setCurrentPage(1)
-        }).catch(error => console.log(error));
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     function onLikeClick() {
@@ -113,7 +132,7 @@ const ActorViewer = forwardRef((props, ref) => {
                 <Pagination
                     simple
                     current={currentPage}
-                    defaultPageSize={ACTOR_CARD_EACH_PAG} //default size of page
+                    defaultPageSize={ACTOR_CARD_EACH_PAGE} //default size of page
                     onChange={handleChange}
                     total={actorNames?.length}
                     className="header-left"

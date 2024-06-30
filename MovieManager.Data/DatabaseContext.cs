@@ -12,7 +12,7 @@ namespace MovieManager.Data
 
         public DatabaseContext(): base(new SQLiteConnection()
         {
-            ConnectionString = new SQLiteConnectionStringBuilder() { DataSource = $"{ConfigurationManager.AppSettings["DatabaseLocation"]}\\MovieDb.db", ForeignKeys = true }.ConnectionString
+            ConnectionString = new SQLiteConnectionStringBuilder() { DataSource = ConfigurationManager.AppSettings["DatabaseLocation"], ForeignKeys = true }.ConnectionString
         }, true) { }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

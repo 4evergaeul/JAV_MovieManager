@@ -28,7 +28,7 @@ namespace MovieManager.BusinessLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Error(ex.ToString());
             }
             return results;
         }
@@ -47,7 +47,7 @@ namespace MovieManager.BusinessLogic
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Error(ex.ToString());
             }
             return results;
         }

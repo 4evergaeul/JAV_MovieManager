@@ -1,25 +1,28 @@
 ﻿using Microsoft.Extensions.Options;
 using MovieManager.ClassLibrary;
+using MovieManager.ClassLibrary.Settings;
+using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
+using System.Threading;
 
 namespace MovieManager.BusinessLogic
 {
     public class UtilityService
     {
         private Dictionary<string, int> diskPortMapping;
-        private const int STARTPORT = 8100;
 
-        public UtilityService(IOptions<UserSettings> config)
+        public UtilityService(IOptions<AppSettings> appConfig)
         {
             diskPortMapping = new Dictionary<string, int>();
-            var currPort = STARTPORT;
-            foreach (var l in config.Value?.MovieDirectory.Split(","))
+            var currPort = appConfig.Value.HttpServerStartPort;
+
+            for (char c = 'A'; c <= 'Z'; c++)
             {
-                diskPortMapping.Add(l.Trim().Substring(0, 1), currPort);
+                diskPortMapping.Add(c.ToString(), currPort);
                 currPort++;
-            }
+            }         
         }
 
         public string GetDiskPort(string disk)

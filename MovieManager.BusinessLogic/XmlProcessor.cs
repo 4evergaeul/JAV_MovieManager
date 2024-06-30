@@ -18,8 +18,10 @@ namespace MovieManager.BusinessLogic
                 xmlDoc.Load(xmlFileLocation);
                 var title = xmlDoc.GetElementsByTagName("title")[0]?.InnerText;
                 var plot = xmlDoc.GetElementsByTagName("plot")[0]?.InnerText;
-                var year = int.Parse(xmlDoc.GetElementsByTagName("year")[0]?.InnerText);
-                var runtime = int.Parse(xmlDoc.GetElementsByTagName("runtime")[0]?.InnerText);
+                var year = int.Parse(!String.IsNullOrEmpty(xmlDoc.GetElementsByTagName("year")[0]?.InnerText) ?
+                    xmlDoc.GetElementsByTagName("year")[0]?.InnerText : DateTime.Now.Year.ToString());
+                var runtime = int.Parse(!String.IsNullOrEmpty(xmlDoc.GetElementsByTagName("runtime")[0]?.InnerText) ?
+                    xmlDoc.GetElementsByTagName("runtime")[0]?.InnerText : "0");
                 var studio = xmlDoc.GetElementsByTagName("studio")[0]?.InnerText;
                 var releaseDate = xmlDoc.GetElementsByTagName("release")[0]?.InnerText;
                 var director = xmlDoc.GetElementsByTagName("director")[0]?.InnerText;
