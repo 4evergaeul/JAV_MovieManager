@@ -18,8 +18,7 @@ namespace MovieManager.TrayApp
             get
             {
                 // May need change port when running on new machine
-                var webAppHost = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppHost"];
-                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", webAppHost) };
+                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", AppController.WebAppHost) };
             }
         }
 

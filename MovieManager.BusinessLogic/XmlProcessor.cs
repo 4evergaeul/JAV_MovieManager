@@ -25,8 +25,8 @@ namespace MovieManager.BusinessLogic
                 var studio = xmlDoc.GetElementsByTagName("studio")[0]?.InnerText;
                 var releaseDate = xmlDoc.GetElementsByTagName("release")[0]?.InnerText;
                 var director = xmlDoc.GetElementsByTagName("director")[0]?.InnerText;
-                var genres = GetGenres(xmlDoc.GetElementsByTagName("genre"));
-                var tags = GetTags(xmlDoc.GetElementsByTagName("tag"));
+                var genres = GetGenres(title, xmlDoc.GetElementsByTagName("genre"));
+                var tags = GetTags(title, xmlDoc.GetElementsByTagName("tag"));
                 var actors = GetActors(xmlDoc.GetElementsByTagName("actor"));
                 var label = xmlDoc.GetElementsByTagName("label")[0]?.InnerText;
 
@@ -35,7 +35,7 @@ namespace MovieManager.BusinessLogic
                     genres.Add(label);
                     tags.Add(label);
                 }
-                    
+
                 movie = new Movie()
                 {
                     Title = title,
@@ -58,13 +58,13 @@ namespace MovieManager.BusinessLogic
             return movie;
         }
 
-        private List<string> GetGenres(XmlNodeList rawGenres)
+        private List<string> GetGenres(string title, XmlNodeList rawGenres)
         {
             var genres = new List<string>();
             foreach(var rawGenre in rawGenres)
             {
                 var genre = ((XmlNode)rawGenre).InnerText.Trim();
-                if (!string.IsNullOrEmpty(genre))
+                if (!string.IsNullOrEmpty(genre) && !title.Contains(genre))
                 {
                     genres.Add(((XmlNode)rawGenre).InnerText);
                 }
@@ -72,13 +72,13 @@ namespace MovieManager.BusinessLogic
             return genres;
         }
 
-        private List<string> GetTags(XmlNodeList rawTags)
+        private List<string> GetTags(string title, XmlNodeList rawTags)
         {
             var tags = new List<string>();
             foreach (var rawTag in rawTags)
             {
                 var tag = ((XmlNode)rawTag).InnerText.Trim();
-                if(!string.IsNullOrEmpty(tag))
+                if(!string.IsNullOrEmpty(tag) && !title.Contains(tag))
                 {
                     tags.Add(tag);
                 }
