@@ -22,6 +22,8 @@ namespace MovieManager.BusinessLogic
                     settings.ActorFiguresDMMDirectory = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
                     sqlString = "select Value from UserSettings where Name = 'ActorFiguresAllDirectory'";
                     settings.ActorFiguresAllDirectory = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
+                    sqlString = "select Value from UserSettings where Name = 'PotPlayerDirectory'";
+                    settings.PotPlayerDirectory = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
                 }
             }
             catch (Exception ex)
@@ -40,6 +42,7 @@ namespace MovieManager.BusinessLogic
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.MovieDirectory}' where Name = 'MovieDirectory'");
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.ActorFiguresDMMDirectory}' where Name = 'ActorFiguresDMMDirectory'");
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.ActorFiguresAllDirectory}' where Name = 'ActorFiguresAllDirectory'");
+                    dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.PotPlayerDirectory}' where Name = 'PotPlayerDirectory'");
                 }
             }
             catch(Exception ex)

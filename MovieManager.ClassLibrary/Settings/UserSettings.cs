@@ -10,6 +10,6 @@ namespace MovieManager.ClassLibrary
         public string MovieDirectory { get; set; }
         public string ActorFiguresDMMDirectory { get; set; }
         public string ActorFiguresAllDirectory { get; set; }
-
+        public string PotPlayerDirectory { get; set; }
     }
 }

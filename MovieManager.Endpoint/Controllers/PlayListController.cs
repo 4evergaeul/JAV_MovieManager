@@ -16,12 +16,13 @@ namespace MovieManager.Endpoint.Controllers
     {
         private string badRequestMessage = "Value cannot be null!";
         private string path = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\AppData\\Roaming\\PotPlayerMini64\\Playlist\\";
-        private string potPlayerExe = @"C:\Program Files\DAUM\PotPlayer\PotPlayerMini64.exe";
+        private string potPlayerExe = "";
         private PotPlayerService _potPlayerService;
 
-        public PlayListController(PotPlayerService potPlayerService)
+        public PlayListController(PotPlayerService potPlayerService, UserSettingsService userSettingsService)
         {
             _potPlayerService = potPlayerService;
+            potPlayerExe = userSettingsService.GetUserSettings().PotPlayerDirectory;
         }
 
 

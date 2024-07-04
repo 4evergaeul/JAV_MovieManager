@@ -21,7 +21,8 @@ const Settings = forwardRef((props, ref) => {
                 form.setFieldsValue({
                     movieDirectories: directoriesArray.map(dir => ({ movieDirectory: dir })),
                     actorFiguresDMMDirectory: resp.actorFiguresDMMDirectory,
-                    actorFiguresAllDirectory: resp.actorFiguresAllDirectory
+                    actorFiguresAllDirectory: resp.actorFiguresAllDirectory,
+                    potPlayerDirectory: resp.potPlayerDirectory
                 });
             });
         }
@@ -37,6 +38,7 @@ const Settings = forwardRef((props, ref) => {
         userSettings.movieDirectory = dir.join("|");
         userSettings.actorFiguresDMMDirectory = values.actorFiguresDMMDirectory;
         userSettings.actorFiguresAllDirectory = values.actorFiguresAllDirectory;
+        userSettings.potPlayerDirectory = values.potPlayerDirectory;
         setUserSettings(userSettings);
         updateUserSettings(userSettings).then(resp => {
             setIsLoading(false);
@@ -172,7 +174,7 @@ const Settings = forwardRef((props, ref) => {
                             sm: { span: 20, offset: 0 },
                         }}
                     >
-                        <Input placeholder="C:\文件夹" style={{ width: "100%", marginRight: 8 }} />
+                        <Input placeholder="C:\文件夹" style={{ width: "150%", marginRight: 8 }} />
                     </Form.Item>
                     <Form.Item
                         label="演员头像（全体）"
@@ -183,7 +185,18 @@ const Settings = forwardRef((props, ref) => {
                             sm: { span: 20, offset: 0 },
                         }}
                     >
-                        <Input placeholder="C:\文件夹" style={{ width: "100%", marginRight: 8 }} />
+                        <Input placeholder="C:\Program Files\DAUM\PotPlayer\PotPlayerMini64.exe" style={{ width: "150%", marginRight: 8 }} />
+                    </Form.Item>
+                    <Form.Item
+                        label="PotPlayer文件夹"
+                        name="potPlayerDirectory"
+                        rules={[{ required: true }]}
+                        wrapperCol={{
+                            xs: { span: 24, offset: 0 },
+                            sm: { span: 20, offset: 0 },
+                        }}
+                    >
+                        <Input placeholder="C:\文件夹" style={{ width: "150%", marginRight: 8 }} />
                     </Form.Item>
                     <Form.Item
                         label="扫描多少天内添加的电影"
