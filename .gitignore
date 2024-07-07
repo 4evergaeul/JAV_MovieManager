@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 MovieManager.DB/MovieDb_Me.db
+MovieManager.DB/MovieDb_Me.db-journal

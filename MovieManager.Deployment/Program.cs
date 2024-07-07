@@ -40,20 +40,24 @@ namespace MovieManager.Deployment
             string trayBuildFolder = $@"{solutionDirectory}\MovieManager.TrayApp\bin\Any CPU\Release\netcoreapp3.1";
             CopyDirectory(webBuildFolder, $@"{trayBuildFolder}\build");
 
-            // Step 3: Update appsettings.json in Tray build folder
+            // Step 3: Copy test lib folder to Tray build folder
+            string testLib = $@"{solutionDirectory}\TestingMovieLib";
+            CopyDirectory(testLib, $@"{trayBuildFolder}\TestingMovieLib");
+
+            // Step 4: Update appsettings.json in Tray build folder
             string appSettingsPath = Path.Combine(trayBuildFolder, "appsettings.json");
             UpdateAppSettings(appSettingsPath, "WebAppDirectory", "build");
 
-            // Step 4: Update MovieManager.TrayApp.dll.config in Tray build folder
+            // Step 5: Update MovieManager.TrayApp.dll.config in Tray build folder
             string configFilePath = Path.Combine(trayBuildFolder, "MovieManager.TrayApp.dll.config");
             UpdateConfig(configFilePath, "DatabaseLocation", "MovieDb.db");
 
-            // Step 5: Copy MovieDb_Clean.db to Tray build folder
+            // Step 6: Copy MovieDb_Clean.db to Tray build folder
             string dbSourcePath = $@"{solutionDirectory}\MovieManager.DB\MovieDb_Clean.db";
             string dbDestPath = Path.Combine(trayBuildFolder, "MovieDb.db");
             File.Copy(dbSourcePath, dbDestPath, true);
 
-            // Step 6: Rename Tray build folder
+            // Step 7: Rename Tray build folder
             string newFolderName = $"MovieManager_{DateTime.Now.ToString("MMddyyyy_hhmmss")}";
             string newFolderPath = Path.Combine(Path.GetDirectoryName(trayBuildFolder), newFolderName);
             Directory.Move(trayBuildFolder, newFolderPath);

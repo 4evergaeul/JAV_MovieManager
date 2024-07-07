@@ -41,8 +41,6 @@ namespace MovieManager.Endpoint
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            ConfigureLogging();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -63,15 +61,6 @@ namespace MovieManager.Endpoint
             {
                 endpoints.MapControllers();
             });
-        }
-
-        public void ConfigureLogging()
-        {
-            Log.Logger = new LoggerConfiguration()
-                            .MinimumLevel.Debug()
-                            .WriteTo.Console()
-                            .WriteTo.File($"logs/movieSrv-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt")
-                            .CreateLogger();
         }
     }
 }
