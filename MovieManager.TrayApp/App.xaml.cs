@@ -54,6 +54,8 @@ namespace MovieManager.TrayApp
 
         private void ExecuteCommands()
         {
+            var initializingWindow = new InitializingWindow();
+            initializingWindow.Show();
             Log.Information("Application is setting up...");
             // Start http-server.
             Log.Information("Creating http-server for hosting media...");
@@ -76,7 +78,7 @@ namespace MovieManager.TrayApp
                 MessageBox.Show($"程序初始化失败，请联系开发者。错误信息：{ex.ToString()}");
                 CloseApp(true);
             }
-            
+
             // Start web app.
             Log.Information("Starting web app...");
             try
@@ -101,23 +103,37 @@ namespace MovieManager.TrayApp
                 File.Copy(filePath, filePathForRead);
                 using (var reader = new StreamReader(filePathForRead))
                 {
+
                     var line = reader.ReadLine();
+                    while(string.IsNullOrEmpty(line)) 
+                    {
+                        line = reader.ReadLine();
+                    }
                     string port = "";
 
                     var match = Regex.Match(line, @"http:\/\/localhost:(\d+)");
-                    if (match.Success)
+                    if (match != null)
                     {
-                        port = match.Groups[1].Value;
+                        if (match.Success)
+                        {
+                            port = match.Groups[1].Value;
+                        }
+                        if (port != "")
+                        {
+                            AppController.WebAppHost = $"http://localhost:{port}";
+                            Log.Information($"Web App started at port {port}");
+                        }
+                        else
+                        {
+                            Log.Warning("Port not found in the output.");
+                        }
                     }
-                    if (port != "")
+                    else
                     {
-                        AppController.WebAppHost = $"http://localhost:{port}";
-                        Log.Information($"Web App started at port {port}");
+                        Log.Warning("Port not found in the output. Use 3000 as port for now.");
+                        AppController.WebAppHost = $"http://localhost:3000";
                     }
-                    else 
-                    { 
-                        Log.Warning("Port not found in the output.");
-                    }
+
                 }
                 AppController.WebAppHost = $"http://localhost:{3000}";
                 Thread.Sleep(1000);
@@ -131,6 +147,8 @@ namespace MovieManager.TrayApp
                 CloseApp(true);
             }
             Log.Information("App started successfully!");
+            initializingWindow.Hide();
+            initializingWindow.Close();
         }
 
         private void CloseApp(bool forceShutdown = false)

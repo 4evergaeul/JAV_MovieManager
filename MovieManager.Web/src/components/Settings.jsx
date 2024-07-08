@@ -1,6 +1,6 @@
 import "./Settings.css";
 import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from "react";
-import { Button, Space, Spin, Input, Form, message } from "antd";
+import { Button, Space, Spin, Input, Form, message, Modal } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { getUserSettings, scanAndAddNewMovies, deleteMovies, updateUserSettings } from "../services/DataService";
 
@@ -12,6 +12,8 @@ const Settings = forwardRef((props, ref) => {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
     const [isFormDirty, setIsFormDirty] = useState(false);
+    const [isAddMovieCompleteModalVisible, setIsAddMovieCompleteModalVisible] = useState(false);
+    const [addedMovieCount, setAddedMovieCount] = useState(0);
 
     useEffect(() => {
         if (!userSettings) {
@@ -55,9 +57,10 @@ const Settings = forwardRef((props, ref) => {
         if(form.getFieldValue("movieDirectories")) {
             setIsLoading(true);
             scanAndAddNewMovies(form.getFieldValue("scanDays")).then(resp => {
-                messageApi.info("已添加 " + resp + " 新电影，刷新页面中！");
-                setIsLoading(false);
-                window.location.reload();
+                messageApi.info("已添加 " + resp + " 新电影！");
+                setAddedMovieCount(resp);
+                setIsAddMovieCompleteModalVisible(true);
+                setIsLoading(false);          
             });
         } else {
             messageApi.error("请先添加电影文件夹！");
@@ -69,6 +72,8 @@ const Settings = forwardRef((props, ref) => {
             setIsLoading(true);
             deleteMovies().then(resp => {
                 messageApi.info("已删除 " + resp?.length + " 电影，请刷新页面!");
+                setAddedMovieCount(resp);
+                setIsAddMovieCompleteModalVisible(true);
                 setIsLoading(false);
             });
         } else {
@@ -94,6 +99,11 @@ const Settings = forwardRef((props, ref) => {
         const isDirty = form.isFieldsTouched();
         setIsFormDirty(isDirty);
     };
+
+    const handleOk = () => {
+        setIsAddMovieCompleteModalVisible(false);
+        window.location.reload();
+    }
 
     return (
         <div className="settings">
@@ -230,6 +240,18 @@ const Settings = forwardRef((props, ref) => {
                         </Spin>
                     </Form.Item>
                 </Form>
+                <Modal 
+                    title="已完成添加电影"
+                    visible={isAddMovieCompleteModalVisible}
+                    onOk={handleOk}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={handleOk}>
+                            刷新页面
+                        </Button>
+                    ]}
+                    >
+                    {`已添加${addedMovieCount}新电影！`} 
+                </Modal>
                 {/* <TextArea
                     rows={6}
                     value={directories.join("|")}
