@@ -7,9 +7,14 @@
         WindowStartupLocation="CenterScreen"
         Topmost="True"
         ShowInTaskbar="False"
-        Width="300" Height="200">
+        Width="300" Height="200"
+        Background="LightGray"
+        Foreground="black"
+        BorderBrush="DarkGray"
+        BorderThickness="2">
     <Grid>
-        <TextBlock Text="程序正在初始化，请稍候..." 
+        <TextBlock x:Name="Text"
+                   Text="程序正在初始化，请稍候..." 
                    VerticalAlignment="Center" 
                    HorizontalAlignment="Center"
                    FontSize="16"

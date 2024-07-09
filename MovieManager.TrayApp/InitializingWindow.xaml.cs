@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MovieManager.TrayApp
 {
@@ -22,6 +23,11 @@ namespace MovieManager.TrayApp
         {
             InitializeComponent();
             this.Closing += InitializingWindow_Closing;
+        }
+
+        public void SetText(string text)
+        {
+            Text.Text = text;
         }
 
         private void InitializingWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

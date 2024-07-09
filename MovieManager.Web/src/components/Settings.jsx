@@ -1,6 +1,6 @@
 import "./Settings.css";
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from "react";
-import { Button, Space, Spin, Input, Form, message, Modal } from "antd";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { Button, Space, Spin, Input, Form, message, Modal, Switch } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { getUserSettings, scanAndAddNewMovies, deleteMovies, updateUserSettings } from "../services/DataService";
 
@@ -14,6 +14,7 @@ const Settings = forwardRef((props, ref) => {
     const [isFormDirty, setIsFormDirty] = useState(false);
     const [isAddMovieCompleteModalVisible, setIsAddMovieCompleteModalVisible] = useState(false);
     const [addedMovieCount, setAddedMovieCount] = useState(0);
+    const [switchState, setSwitchState] = useState(true);
 
     useEffect(() => {
         if (!userSettings) {
@@ -24,7 +25,8 @@ const Settings = forwardRef((props, ref) => {
                     movieDirectories: directoriesArray.map(dir => ({ movieDirectory: dir })),
                     actorFiguresDMMDirectory: resp.actorFiguresDMMDirectory,
                     actorFiguresAllDirectory: resp.actorFiguresAllDirectory,
-                    potPlayerDirectory: resp.potPlayerDirectory
+                    potPlayerDirectory: resp.potPlayerDirectory,
+                    scanDays: "180"
                 });
             });
         }
@@ -35,7 +37,7 @@ const Settings = forwardRef((props, ref) => {
     }));
 
     const onFinish = (values) => {
-        let dir = values.movieDirectories.map(item => item.movieDirectory)
+        let dir = values.movieDirectories.map(item => item.movieDirectory);
         setIsLoading(true);
         userSettings.movieDirectory = dir.join("|");
         userSettings.actorFiguresDMMDirectory = values.actorFiguresDMMDirectory;
@@ -56,7 +58,8 @@ const Settings = forwardRef((props, ref) => {
     const addNewMovies = () => { 
         if(form.getFieldValue("movieDirectories")) {
             setIsLoading(true);
-            scanAndAddNewMovies(form.getFieldValue("scanDays")).then(resp => {
+            const scanDays = switchState ? -1 : form.getFieldValue("scanDays");
+            scanAndAddNewMovies(scanDays).then(resp => {
                 messageApi.info("已添加 " + resp + " 新电影！");
                 setAddedMovieCount(resp);
                 setIsAddMovieCompleteModalVisible(true);
@@ -103,7 +106,11 @@ const Settings = forwardRef((props, ref) => {
     const handleOk = () => {
         setIsAddMovieCompleteModalVisible(false);
         window.location.reload();
-    }
+    };
+
+    const handleSwitchChange = (checked) => {
+        setSwitchState(checked);
+    };
 
     return (
         <div className="settings">
@@ -208,6 +215,7 @@ const Settings = forwardRef((props, ref) => {
                     >
                         <Input placeholder="C:\文件夹" style={{ width: "150%", marginRight: 8 }} />
                     </Form.Item>
+                    { !switchState && (
                     <Form.Item
                         label="扫描多少天内添加的电影"
                         name="scanDays"
@@ -218,6 +226,17 @@ const Settings = forwardRef((props, ref) => {
                         }}
                     >
                         <Input style={{ width: "100%", marginRight: 8 }} />
+                    </Form.Item>
+                    )}
+                    <Form.Item
+                        label="扫描所有文件"
+                        valuePropName="checked"
+                        wrapperCol={{
+                            xs: { span: 24, offset: 0 },
+                            sm: { span: 20, offset: 4 },
+                        }}
+                    >
+                        <Switch onChange={handleSwitchChange} defaultChecked={true} />
                     </Form.Item>
                     <Form.Item
                         wrapperCol={{
@@ -249,16 +268,9 @@ const Settings = forwardRef((props, ref) => {
                             刷新页面
                         </Button>
                     ]}
-                    >
+                >
                     {`已添加${addedMovieCount}新电影！`} 
                 </Modal>
-                {/* <TextArea
-                    rows={6}
-                    value={directories.join("|")}
-                    readOnly
-                    placeholder="点击下方按钮加入文件夹，多个文件夹请竖线（|）分隔，如
-                    C:\文件夹1|C:\文件夹2"
-                /> */}
             </Space>
         </div>
     );

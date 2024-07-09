@@ -32,6 +32,14 @@ namespace MovieManager.TrayApp
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            if (IsAnotherInstanceRunning())
+            {
+                MessageBox.Show("程序已在其他进程打开，请在右下角托盘图标打开程序。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                Shutdown();
+                return;
+            }
+
             //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -153,6 +161,9 @@ namespace MovieManager.TrayApp
 
         private void CloseApp(bool forceShutdown = false)
         {
+            //var initializingWindow = new InitializingWindow();
+            //initializingWindow.SetText("程序关闭中，请稍候...");
+            //initializingWindow.Show();
             Log.Information("Application is closing...");
             notifyIcon.Dispose(); //the icon would clean up automatically, but this is cleaner
             if (webAppProcess != null)
@@ -164,11 +175,13 @@ namespace MovieManager.TrayApp
                 KillProcessAndChildrens(p.Id);
             }            
             Process.GetCurrentProcess().Kill();
-            if (forceShutdown ) 
+            Log.Information("Application is closed.");
+            //initializingWindow.Hide();
+            //initializingWindow.Close();
+            if (forceShutdown) 
             {
                 Application.Current.Shutdown();
             }
-            Log.Information("Application is closed.");
         }
 
         private void KillProcessAndChildrens(int pid)
@@ -194,6 +207,13 @@ namespace MovieManager.TrayApp
                     KillProcessAndChildrens(Convert.ToInt32(mo["ProcessID"])); 
                 }
             }
+        }
+
+        private bool IsAnotherInstanceRunning()
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            var processes = Process.GetProcessesByName(currentProcess.ProcessName);
+            return processes.Any(p => p.Id != currentProcess.Id);
         }
     }
 }
