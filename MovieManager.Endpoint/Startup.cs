@@ -34,7 +34,6 @@ namespace MovieManager.Endpoint
             services.AddTransient<GenreService>();
             services.AddTransient<TagService>();
             services.AddTransient<DirectorService>();
-            services.AddTransient<UtilityService>();
             services.AddSingleton<UserSettingsService>();
         }
 

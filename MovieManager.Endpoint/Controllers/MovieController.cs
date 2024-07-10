@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using MovieManager.BusinessLogic;
 using MovieManager.ClassLibrary;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Serilog;
 
 namespace MovieManager.Endpoint.Controllers
 {
@@ -165,7 +161,7 @@ namespace MovieManager.Endpoint.Controllers
             foreach (var md in movieDir)
             {
                 var m = scanner.ScanFiles(md.Trim(), days);
-                await _movieService.InsertMovies(m, false, true);
+                await _movieService.InsertMovies(m, false, false);
             }
             return Ok(_movieService.GetMoviesCount() - prevMoviesCount);
         }

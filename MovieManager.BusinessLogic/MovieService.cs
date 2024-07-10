@@ -16,13 +16,10 @@ namespace MovieManager.BusinessLogic
     public class MovieService
     {
         private ScrapeService _scrapeService;
-        private UtilityService _utilityService;
 
-        public MovieService(ScrapeService scrapeService,
-            UtilityService utilityService)
+        public MovieService(ScrapeService scrapeService)
         {
             _scrapeService = scrapeService;
-            _utilityService = utilityService;
         }
 
         public async Task InsertMovies(List<Movie> movies, bool scrapeActorInfo = false, bool forceUpdate = false)
@@ -57,24 +54,17 @@ namespace MovieManager.BusinessLogic
                             }
                             else if (exisitingMovie != null)
                             {
-                                //if (exisitingMovie.FanArtLocation == null && exisitingMovie.PosterFileLocation == null)
-                                //{
-                                //    UpdateMovie(context, movie, exisitingMovie);
-                                //}
-                                //if (exisitingMovie.MovieLocation != movie.MovieLocation)
-                                //{
-                                //    UpdateMovie(context, movie, exisitingMovie);
-                                //}
+                                exisitingMovie.Actors = context.MovieActors.Where(x => x.ImdbId == movie.ImdbId).Select(x => x.ActorName).ToList();
+                                exisitingMovie.Genres = context.MovieGenres.Where(x => x.ImdbId == movie.ImdbId).Select(x => x.GenreName).ToList();
+                                exisitingMovie.Tags = context.MovieTags.Where(x => x.ImdbId == movie.ImdbId).Select(x => x.TagName).ToList();
                                 if (!string.IsNullOrEmpty(movie.DateAdded) && !string.IsNullOrEmpty(exisitingMovie.DateAdded))
                                 {
                                     //|| (DateTime.Parse(movie.DateAdded) > DateTime.Parse(exisitingMovie.DateAdded))
-                                    if (movie.PosterFileLocation != exisitingMovie.PosterFileLocation
-                                        || movie.FanArtLocation != exisitingMovie.FanArtLocation
-                                        || movie.MovieLocation != exisitingMovie.MovieLocation
-                                        || forceUpdate)
+                                    if (CheckUpdate(movie,exisitingMovie) || forceUpdate)
                                     {
                                         UpdateMovie(context, movie, exisitingMovie);
                                         Log.Information($"Updating {movie.ImdbId} data...");
+                                        count++;
                                     }
                                 }
                             }
@@ -426,6 +416,54 @@ namespace MovieManager.BusinessLogic
             return false;
         }
 
+        private bool CheckUpdate(Movie movie, Movie existingMovie)
+        {
+            var properties = typeof(Movie).GetProperties();
+            foreach (var prop in properties)
+            {
+                // Skip ImdbId
+                if (prop.Name == nameof(Movie.ImdbId)
+                    || prop.Name == nameof(Movie.PlayedCount))
+                {
+                    continue;
+                }
+
+                if (prop.PropertyType == typeof(List<string>))
+                {
+                    var movieList = prop.GetValue(movie) as List<string>;
+                    var existingMovieList = prop.GetValue(existingMovie) as List<string>;
+
+                    if (movieList.Count != existingMovieList.Count)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if (!movieList.SequenceEqual(existingMovieList))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    // Get the values of the properties for both objects
+                    var movieValue = prop.GetValue(movie);
+                    var existingMovieValue = prop.GetValue(existingMovie);
+
+                    // Compare the values, if they are not equal return true
+                    if (!Equals(movieValue, existingMovieValue))
+                    {
+                        return true;
+                    }
+                }
+
+            }
+
+            // If all properties are equal, return false
+            return false;
+        }
+
         private List<MovieViewModel> BuildMovieViewModel(List<Movie> movies)
         {
             var results = new List<MovieViewModel>();
@@ -469,8 +507,8 @@ namespace MovieManager.BusinessLogic
                                         {
                                             ImdbId = movie.ImdbId,
                                             Title = title,
-                                            PosterFileLocation = _utilityService.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.PosterFileLocation?.Remove(0, 3),
-                                            FanArtLocation = _utilityService.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.FanArtLocation?.Remove(0, 3),
+                                            PosterFileLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.PosterFileLocation?.Remove(0, 3),
+                                            FanArtLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.FanArtLocation?.Remove(0, 3),
                                             MovieLocation = movieLocations[k],
                                             DateAdded = movie.DateAdded,
                                             Director = movie.Director

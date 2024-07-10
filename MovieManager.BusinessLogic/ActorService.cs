@@ -16,14 +16,11 @@ namespace MovieManager.BusinessLogic
     public class ActorService
     {
         private UserSettingsService _config;
-        private UtilityService _utilityService;
 
-        public ActorService(UserSettingsService config, 
-            UtilityService utilityService)
+        public ActorService(UserSettingsService config)
         {
             CultureInfo PronoCi = new CultureInfo(2052);
             _config = config;
-            _utilityService = utilityService;
         }
 
         #region Get Full Actor Info
@@ -257,8 +254,8 @@ namespace MovieManager.BusinessLogic
                                     Body = actor.Body,
                                     SexAppeal = actor.SexAppeal,
                                     Overall = actor.Overall,
-                                    FigureSmallPath = String.IsNullOrEmpty(figureSmallPath) ? "" : _utilityService.GetDiskPort(figureSmallPath?.Substring(0, 1)) + figureSmallPath?.Remove(0, 3),
-                                    FigureLargePath = String.IsNullOrEmpty(figureLargePath) ? "" : _utilityService.GetDiskPort(figureLargePath?.Substring(0, 1)) + figureLargePath?.Remove(0, 3)
+                                    FigureSmallPath = String.IsNullOrEmpty(figureSmallPath) ? "" : AppStaticMethods.GetDiskPort(figureSmallPath?.Substring(0, 1)) + figureSmallPath?.Remove(0, 3),
+                                    FigureLargePath = String.IsNullOrEmpty(figureLargePath) ? "" : AppStaticMethods.GetDiskPort(figureLargePath?.Substring(0, 1)) + figureLargePath?.Remove(0, 3)
                                 });
                             }
                         }

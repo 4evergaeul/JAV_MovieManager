@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MovieManager.BusinessLogic\MovieManager.BusinessLogic.csproj" />
     <ProjectReference Include="..\MovieManager.Endpoint\MovieManager.Endpoint.csproj" />
   </ItemGroup>
 

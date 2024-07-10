@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using MovieManager.BusinessLogic;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -18,7 +19,7 @@ namespace MovieManager.TrayApp
             get
             {
                 // May need change port when running on new machine
-                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", AppController.WebAppHost) };
+                return new DelegateCommand { CommandAction = () => Process.Start("explorer.exe", AppStaticProperties.WebAppHost) };
             }
         }
 

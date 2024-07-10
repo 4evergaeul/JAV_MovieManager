@@ -7,7 +7,7 @@ import { UserOutlined, GroupOutlined, TagOutlined, CalendarOutlined } from '@ant
 import CheckboxTree from "react-checkbox-tree";
 import MovieViewer from './components/MovieViewer';
 import ActorViewer from './components/ActorViewer';
-import Settings from './components/Settings';
+import SettingsViewer from './components/SettingsViewer';
 import GenreViewer from './components/GenreViewer';
 import TagViewer from './components/TagViewer';
 import DirectorViewer from './components/DirectorViewer.jsx';
@@ -355,7 +355,7 @@ function App() {
               {selectedMenuKey[0] === '3' ? <GenreViewer ref={genreViewer} /> : ""}
               {selectedMenuKey[0] === '4' ? <TagViewer ref={tagViewer} /> : ""}
               {selectedMenuKey[0] === '5' ? <DirectorViewer ref={directorViewer} /> : ""}
-              {selectedMenuKey[0] === '0' ? <Settings ref={settings}/> : ""}
+              {selectedMenuKey[0] === '0' ? <SettingsViewer ref={settings}/> : ""}
             </Content>
           </Layout>
         </Layout>

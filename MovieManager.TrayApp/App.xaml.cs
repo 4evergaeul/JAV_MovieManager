@@ -15,6 +15,8 @@ using System.Threading;
 using System.Windows;
 using Serilog;
 using System.Linq.Expressions;
+using System.Windows.Controls;
+using MovieManager.BusinessLogic;
 
 namespace MovieManager.TrayApp
 {
@@ -25,7 +27,6 @@ namespace MovieManager.TrayApp
     {
         private TaskbarIcon notifyIcon;
         private Process webAppProcess;
-        private List<Process> httpServerProcesses = new List<Process>();
 
         public void Test() { }
 
@@ -70,15 +71,63 @@ namespace MovieManager.TrayApp
             try
             {
                 var currentPort = int.Parse(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["HttpServerStartPort"]);
-                for (char c = 'A'; c <= 'Z'; c++)
+                using (var dbContext = new DatabaseContext())
                 {
-                    var info = new ProcessStartInfo("cmd.exe", "/K " + $"http-server {c}:/ -p {currentPort}");
-                    info.CreateNoWindow = true;
-                    httpServerProcesses.Add(Process.Start(info));
-                    Log.Information($"Created http-server for {c} drive at port {currentPort}");
-                    Thread.Sleep(100);
-                    currentPort++;
+                    var sqlString = "select Value from UserSettings where Name = 'MovieDirectory'";
+                    var movieDir = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
+                    sqlString = "select Value from UserSettings where Name = 'ActorFiguresDMMDirectory'";
+                    var actorDMMDir = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
+                    sqlString = "select Value from UserSettings where Name = 'ActorFiguresAllDirectory'";
+                    var actorAllDir = dbContext.Database.SqlQuery<string>(sqlString).FirstOrDefault();
+
+                    // Start http-server for movie libs.
+                    if (!string.IsNullOrEmpty(movieDir))
+                    {
+                        var movieDirectories = movieDir.Split('|');
+                        foreach (var m in movieDirectories)
+                        {
+                            var disk = m.Substring(0, 1).Trim();
+                            if (!AppStaticProperties.diskPortMappings.ContainsKey(disk))
+                            {
+                                AppStaticMethods.CreateHttpServer(currentPort, disk);                             
+                                currentPort++;
+                            }
+                        }
+                    }
+
+                    // Start http-server for DMM actor thumbnails.
+                    if (!string.IsNullOrEmpty(actorDMMDir))
+                    {
+                        var disk = actorDMMDir.Substring(0, 1).Trim();
+                        if (!AppStaticProperties.diskPortMappings.ContainsKey(disk))
+                        {
+                            AppStaticMethods.CreateHttpServer(currentPort, disk);
+                            currentPort++;
+                        }
+                    }
+
+                    // Start http-server for All actor thumbnails
+                    if (!string.IsNullOrEmpty(actorAllDir))
+                    {
+                        var disk = actorAllDir.Substring(0, 1).Trim();
+                        if (!AppStaticProperties.diskPortMappings.ContainsKey(disk))
+                        {
+                            AppStaticMethods.CreateHttpServer(currentPort, disk);
+                            currentPort++;
+                        }
+                    }
                 }
+
+
+                //for (char c = 'A'; c <= 'Z'; c++)
+                //{
+                //    var info = new ProcessStartInfo("cmd.exe", "/K " + $"http-server {c}:/ -p {currentPort}");
+                //    info.CreateNoWindow = true;
+                //    httpServerProcesses.Add(Process.Start(info));
+                //    Log.Information($"Created http-server for {c} drive at port {currentPort}");
+                //    Thread.Sleep(100);
+                //    currentPort++;
+                //}
             }
             catch (Exception ex)
             {
@@ -128,7 +177,7 @@ namespace MovieManager.TrayApp
                         }
                         if (port != "")
                         {
-                            AppController.WebAppHost = $"http://localhost:{port}";
+                            AppStaticProperties.WebAppHost = $"http://localhost:{port}";
                             Log.Information($"Web App started at port {port}");
                         }
                         else
@@ -139,14 +188,14 @@ namespace MovieManager.TrayApp
                     else
                     {
                         Log.Warning("Port not found in the output. Use 3000 as port for now.");
-                        AppController.WebAppHost = $"http://localhost:3000";
+                        AppStaticProperties.WebAppHost = $"http://localhost:3000";
                     }
 
                 }
-                AppController.WebAppHost = $"http://localhost:{3000}";
+                AppStaticProperties.WebAppHost = $"http://localhost:{3000}";
                 Thread.Sleep(1000);
                 File.Delete(filePathForRead);
-                Process.Start("explorer.exe", AppController.WebAppHost);
+                Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
             }
             catch(Exception ex)
             {
@@ -161,51 +210,25 @@ namespace MovieManager.TrayApp
 
         private void CloseApp(bool forceShutdown = false)
         {
-            //var initializingWindow = new InitializingWindow();
-            //initializingWindow.SetText("程序关闭中，请稍候...");
-            //initializingWindow.Show();
+            var initializingWindow = new InitializingWindow();
             Log.Information("Application is closing...");
             notifyIcon.Dispose(); //the icon would clean up automatically, but this is cleaner
             if (webAppProcess != null)
-            { 
-                KillProcessAndChildrens(webAppProcess.Id);
-            }
-            foreach (var p in httpServerProcesses)
             {
-                KillProcessAndChildrens(p.Id);
-            }            
-            Process.GetCurrentProcess().Kill();
+                AppStaticMethods.KillProcessAndChildrens(webAppProcess.Id);
+            }
+            Log.Information("Web App shutdown.");
+            foreach (var p in AppStaticProperties.portHttpServerProcessMappings.Values)
+            {
+            
+                AppStaticMethods.KillProcessAndChildrens(p.Id);
+            }
+            Log.Information("Http-servers shutdown.");
             Log.Information("Application is closed.");
-            //initializingWindow.Hide();
-            //initializingWindow.Close();
+            Process.GetCurrentProcess().Kill();
             if (forceShutdown) 
             {
                 Application.Current.Shutdown();
-            }
-        }
-
-        private void KillProcessAndChildrens(int pid)
-        {
-            ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
-              ("Select * From Win32_Process Where ParentProcessID=" + pid);
-            ManagementObjectCollection processCollection = processSearcher.Get();
-
-            try
-            {
-                Process proc = Process.GetProcessById(pid);
-                if (!proc.HasExited) proc.Kill();
-            }
-            catch (ArgumentException)
-            {
-                // Process already exited.
-            }
-
-            if (processCollection != null)
-            {
-                foreach (ManagementObject mo in processCollection)
-                {
-                    KillProcessAndChildrens(Convert.ToInt32(mo["ProcessID"])); 
-                }
             }
         }
 
