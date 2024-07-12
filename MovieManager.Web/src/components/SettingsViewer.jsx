@@ -48,10 +48,8 @@ const SettingsViewer = forwardRef((props, ref) => {
         try {
             await updateUserSettings(userSettings);
             setIsLoading(false);
-            messageApi.info("已保存，即将刷新页面。");
+            messageApi.info("已保存。");
             setIsFormDirty(false);
-            await sleep(1000);
-            window.location.reload();
         } catch (error) {
             messageApi.error("保存失败！");
             console.log(error);

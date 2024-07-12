@@ -45,6 +45,7 @@ namespace MovieManager.BusinessLogic
                     {
                         try
                         {
+                            var status = "";
                             currentImdb = movie.ImdbId;
                             Log.Debug($"Start to process movie: {movie.ImdbId}.");
                             var exisitingMovie = context.Movies.Where(x => x.ImdbId == movie.ImdbId).FirstOrDefault();
@@ -52,6 +53,8 @@ namespace MovieManager.BusinessLogic
                             {
                                 InsertMovie(context, movie);
                                 count++;
+                                status = "add";
+                                
                             }
                             else if (exisitingMovie != null)
                             {
@@ -64,13 +67,25 @@ namespace MovieManager.BusinessLogic
                                     if (CheckUpdate(movie,exisitingMovie) || forceUpdate)
                                     {
                                         UpdateMovie(context, movie, exisitingMovie);
+                                        status = "update";
                                         Log.Information($"Updating {movie.ImdbId} data...");
                                         count++;
                                     }
                                 }
                             }
                             context.SaveChanges();
-                            Log.Debug($"Movie: {movie.ImdbId} has been added.");
+                            switch (status)
+                            {
+                                case "add":
+                                    Log.Debug($"Movie: {movie.ImdbId} has been added.");
+                                    break;
+                                case "update":
+                                    Log.Debug($"Movie: {movie.ImdbId} has been updated.");
+                                    break;
+                                case "":
+                                    Log.Debug($"No Changes on {movie.ImdbId}");
+                                    break;
+                            }
                         }
                         catch (Exception ex)
                         {

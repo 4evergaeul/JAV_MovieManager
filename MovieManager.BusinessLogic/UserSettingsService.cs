@@ -53,6 +53,7 @@ namespace MovieManager.BusinessLogic
         {
             try
             {
+                var prevMovieDir = GetUserSettings().MovieDirectory;
                 using (var dbContext = new DatabaseContext())
                 {
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.MovieDirectory}' where Name = 'MovieDirectory'");
@@ -60,40 +61,28 @@ namespace MovieManager.BusinessLogic
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.ActorFiguresAllDirectory}' where Name = 'ActorFiguresAllDirectory'");
                     dbContext.Database.ExecuteSqlCommand($"update UserSettings set value = '{settings.PotPlayerDirectory}' where Name = 'PotPlayerDirectory'");
                 }
-                var disks = new HashSet<string>();
 
-                if (!string.IsNullOrEmpty(settings.MovieDirectory))
+                var newMovieDir = GetUserSettings().MovieDirectory;
+                var movieDirToRemove = new List<string>();
+                // Remove added movies from previous movie directories.
+                if (string.IsNullOrEmpty(prevMovieDir) && string.IsNullOrEmpty(newMovieDir))
                 {
-                    var movieDirectories = settings.MovieDirectory.Split('|');
-                    foreach (var m in movieDirectories)
+                    var preMovieDirs = prevMovieDir.Split("|");
+                    var newMovieDirs = newMovieDir.Split("|");
+                    foreach (var preMovieDir in preMovieDirs)
                     {
-                        var disk = m.Substring(0, 1).Trim();
-                        if (!disks.Contains(disk))
+                        if (!newMovieDir.Contains(preMovieDir))
                         {
-                            disks.Add(disk);
+                            movieDirToRemove.Add(preMovieDir);
                         }
-                    }                }
-
-                if (!string.IsNullOrEmpty(settings.ActorFiguresDMMDirectory))
-                {
-                    var disk = settings.ActorFiguresDMMDirectory.Substring(0, 1).Trim();
-                    if (!disks.Contains(disk))
-                    {
-                        disks.Add(disk);
                     }
                 }
-
-                if (!string.IsNullOrEmpty(settings.ActorFiguresAllDirectory))
-                {
-                    var disk = settings.ActorFiguresAllDirectory.Substring(0, 1).Trim();
-                    if (!disks.Contains(disk))
-                    {
-                        disks.Add(disk);
-                    }
+                foreach (var dir in movieDirToRemove)
+                { 
+                    var scanner = new FileScanner(_xmlProcessor);
+                    _movieService.DeleteRemovedMovies(scanner.ScanFilesForImdbId(dir));
                 }
-                // Remove movies
-                var scanner = new FileScanner(_xmlProcessor);
-                _movieService.DeleteRemovedMovies(scanner.ScanFilesForImdbId(GetUserSettings().MovieDirectory));
+                
             }
             catch (Exception ex)
             {
