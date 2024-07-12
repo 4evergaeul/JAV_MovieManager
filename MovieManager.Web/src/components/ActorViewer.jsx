@@ -2,7 +2,7 @@ import "./ActorViewer.css"
 import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import { Pagination, Button, Spin, Modal, Descriptions, Input, message, Card } from 'antd';
 import { HeartFilled, HeartOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { getActorByName, likeActor, getMoivesByFilter, createPotPlayerPlayListByActors, getActorByNames } from "../services/DataService";
+import { getActorByName, likeActor, getMoivesByFilter, createPotPlayerPlayListByActors, getActorByNames, getImage } from "../services/DataService";
 import MovieViewer from "./MovieViewer";
 import { ACTOR_CARD_EACH_PAG as ACTOR_CARD_EACH_PAGE } from "../Constant";
 
@@ -157,7 +157,7 @@ const ActorViewer = forwardRef((props, ref) => {
                                 key={"actor-" + i}
                                 className="actor-poster-card"
                                 onClick={() => showActorDetails(i)}
-                                cover={<img className="actor-image" src={actor?.figureSmallPath !== "" ? actor?.figureSmallPath : require('../Imgs/NotFound.jpg')} />}
+                                cover={<ImageLoader type={10} id={actor?.name} />}
                             >
                                 <Meta title={actor?.name} />
                             </Card>)}
@@ -178,8 +178,8 @@ const ActorViewer = forwardRef((props, ref) => {
             >
                 <div className="left-container">
                     <Card
-                        hoverable
-                        cover={<img src={actor?.figureLargePath !== "" ? actor?.figureLargePath : require('../Imgs/NotFound.jpg')} />}
+                        hoverable                       
+                        cover={<ImageLoader type={11} id={actor?.name} />}
                         className="actor-detail-card"
                     ></Card>
                 </div>
@@ -203,4 +203,19 @@ const ActorViewer = forwardRef((props, ref) => {
         </div>
     )
 });
+
+const ImageLoader = ({ type, id }) => {
+    const [imageSrc, setImageSrc] = useState(null);
+
+    useEffect(() => {
+        const fetchImage = async () => {
+            const src = await getImage(type, id);
+            setImageSrc(src);
+        };
+        fetchImage();
+    }, [type, id]);
+
+    return imageSrc ? <img src={imageSrc} alt="" className="actor-image" /> : <img src={require('../Imgs/NotFound.jpg')} alt="" className="actor-image" />;
+};
+
 export default ActorViewer;

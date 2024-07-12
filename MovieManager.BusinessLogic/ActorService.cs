@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MovieManager.ClassLibrary;
+using MovieManager.ClassLibrary.RequestBody;
 using MovieManager.Data;
 using Serilog;
 using System;
@@ -202,7 +203,94 @@ namespace MovieManager.BusinessLogic
             return false;
         }
 
+        public string GetImagePath(ImageRequest imageRequest)
+        {
+            var result = "";
+            var figureSmallPath = "";
+            var figureLargePath = "";
+            try
+            {
+                if (!string.IsNullOrEmpty(_config.GetUserSettings().ActorFiguresDMMDirectory))
+                {
+                    figureSmallPath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresDMMDirectory, $"AI-Fix-{imageRequest.Id}.jpg", SearchOption.AllDirectories).FirstOrDefault();
+                }
+                if (!string.IsNullOrEmpty(_config.GetUserSettings().ActorFiguresAllDirectory))
+                {
+                    if (string.IsNullOrEmpty(figureSmallPath))
+                    {
+                        figureSmallPath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresAllDirectory, $"{imageRequest.Id}.jpg", SearchOption.AllDirectories).FirstOrDefault();
+                    }
+                    figureLargePath = Directory.EnumerateFiles(_config.GetUserSettings().ActorFiguresAllDirectory, $"{imageRequest.Id}.jpg", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).Length).FirstOrDefault();
+                }
+                using (var context = new DatabaseContext())
+                {
+                    switch (imageRequest.ImageType)
+                    {
+                        case 10:
+                            result = figureSmallPath;
+                            break;
+                        case 11:
+                            result = figureLargePath;
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occurs when getting image path. \n\r");
+                Log.Error(ex.ToString());
+            }
+            return result;
+        }
+
         private List<ActorViewModel> BuildActorViewModels(List<Actor> actors)
+        {
+            var result = new List<ActorViewModel>();
+            var lockObject = new object();
+            var keyValuePairs = new List<KeyValuePair<Actor, bool>>();
+            foreach (var a in actors)
+            {
+                keyValuePairs.Add(new KeyValuePair<Actor, bool>(a, false));
+            }
+            var taskArray = new Task[8];
+            for (int i = 0; i < taskArray.Length; i++)
+            {
+                taskArray[i] = Task.Factory.StartNew(() =>
+                {
+                    for (int j = 0; j < keyValuePairs.Count; j++)
+                    {
+                        lock (lockObject)
+                        {
+                            if (!keyValuePairs[j].Value)
+                            {
+                                var newKvp = new KeyValuePair<Actor, bool>(keyValuePairs[j].Key, true);
+                                keyValuePairs[j] = newKvp;
+                                var actor = keyValuePairs[j].Key;
+                                result.Add(new ActorViewModel()
+                                {
+                                    Cup = actor.Cup,
+                                    DateofBirth = actor.DateofBirth,
+                                    Height = actor.Height,
+                                    LastUpdated = actor.LastUpdated,
+                                    Liked = actor.Liked,
+                                    Name = actor.Name,
+                                    Bust = actor.Bust,
+                                    Waist = actor.Waist,
+                                    Hips = actor.Hips,
+                                    Looks = actor.Looks,
+                                    Body = actor.Body,
+                                    SexAppeal = actor.SexAppeal,
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+            Task.WaitAll(taskArray);
+            return result;
+        }
+
+        private List<ActorViewModel> BuildActorViewModels_HttpServer(List<Actor> actors)
         {
             var result = new List<ActorViewModel>();
             var lockObject = new object();
@@ -253,7 +341,6 @@ namespace MovieManager.BusinessLogic
                                     Looks = actor.Looks,
                                     Body = actor.Body,
                                     SexAppeal = actor.SexAppeal,
-                                    Overall = actor.Overall,
                                     FigureSmallPath = String.IsNullOrEmpty(figureSmallPath) ? "" : AppStaticMethods.GetDiskPort(figureSmallPath?.Substring(0, 1)) + figureSmallPath?.Remove(0, 3),
                                     FigureLargePath = String.IsNullOrEmpty(figureLargePath) ? "" : AppStaticMethods.GetDiskPort(figureLargePath?.Substring(0, 1)) + figureLargePath?.Remove(0, 3)
                                 });

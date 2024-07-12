@@ -1,8 +1,8 @@
 import "./MovieViewer.css"
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import { Card, Pagination, Button, message, Menu, Dropdown, Modal, Spin, Descriptions, Image, Input, Space } from 'antd';
 import { PlusCircleOutlined, ArrowDownOutlined, UserOutlined, GroupOutlined, TagOutlined, HeartFilled, HeartOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { createPotPlayerPlayList, addToDefaultPotPlayerPlayList, getMoivesByFilter, getMovieDetails, getMoviesWildcardSearch, getMoviesQuerySearch, likeMovie } from "../services/DataService";
+import { createPotPlayerPlayList, addToDefaultPotPlayerPlayList, getMoivesByFilter, getMovieDetails, getMoviesWildcardSearch, getMoviesQuerySearch, likeMovie, getMostRecentMovies, getImage } from "../services/DataService";
 import { MOVIE_CARD_EACH_PAGE_LARGE_SCREEN, MOVIE_CARD_EACH_PAGE_SMALL_SCREEN } from "../Constant.js"
 const { Meta } = Card;
 const { Search } = Input;
@@ -217,19 +217,18 @@ const MovieViewer = forwardRef((props, ref) => {
             </div>
             {isLoading ? <div><Spin size="large" /></div> : (
                 <div className="movie-list">
-                    {movies?.slice(minValue, maxValue).map((movie, i) =>
+                    {movies?.slice(minValue, maxValue).map((movie, i) => (
                         <Card
                             className="poster-card"
                             key={"movie-" + i + minValue}
                             hoverable
-                            // cover={<img className="poster-image" />}
-                            cover={<img className="image" src={movie.posterFileLocation} />}
+                            cover={<ImageLoader type={0} id={movie.imdbId} />}
                             onClick={() => showMovieDetails(i + minValue)}
                         >
                             <Meta title={movie.imdbId} description={movie.title} />
-                        </Card>)}
+                        </Card>
+                    ))}
                 </div>
-
             )}
             <Modal
                 title={movieDetailsTitle}
@@ -242,7 +241,7 @@ const MovieViewer = forwardRef((props, ref) => {
             >
                 <Card
                     hoverable
-                    cover={<Image className="fanart-image" src={movie?.fanArtLocation} />}
+                    cover={<ImageLoader type={1} id={movie?.imdbId} />}
                     className="fanart-card"
                 ></Card>
                 <Descriptions title={movie?.title} bordered>
@@ -276,6 +275,20 @@ const MovieViewer = forwardRef((props, ref) => {
             </Modal>
         </div>
     )
-
 });
+
+const ImageLoader = ({ type, id }) => {
+    const [imageSrc, setImageSrc] = useState(null);
+
+    useEffect(() => {
+        const fetchImage = async () => {
+            const src = await getImage(type, id);
+            setImageSrc(src);
+        };
+        fetchImage();
+    }, [type, id]);
+
+    return imageSrc ? <img src={imageSrc} alt="" className="image" /> : <Spin />;
+};
+
 export default MovieViewer;

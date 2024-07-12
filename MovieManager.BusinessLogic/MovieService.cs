@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MovieManager.ClassLibrary;
+using MovieManager.ClassLibrary.RequestBody;
 using MovieManager.Data;
 using Serilog;
 using System;
@@ -416,6 +417,32 @@ namespace MovieManager.BusinessLogic
             return false;
         }
 
+        public string GetImagePath(ImageRequest r)
+        {
+            var result = "";
+            try
+            {
+                using (var context = new DatabaseContext())
+                {
+                    switch (r.ImageType)
+                    {
+                        case 0:
+                            result = context.Movies.Where(x => x.ImdbId == r.Id).FirstOrDefault()?.PosterFileLocation;
+                            break;
+                        case 1:
+                            result = context.Movies.Where(x => x.ImdbId == r.Id).FirstOrDefault()?.FanArtLocation;
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occurs when getting image path. \n\r");
+                Log.Error(ex.ToString());
+            }
+            return result;
+        }
+
         private bool CheckUpdate(Movie movie, Movie existingMovie)
         {
             var properties = typeof(Movie).GetProperties();
@@ -507,8 +534,11 @@ namespace MovieManager.BusinessLogic
                                         {
                                             ImdbId = movie.ImdbId,
                                             Title = title,
-                                            PosterFileLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.PosterFileLocation?.Remove(0, 3),
-                                            FanArtLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.FanArtLocation?.Remove(0, 3),
+                                            // Commented for deprecating http-server.
+                                            //PosterFileLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.PosterFileLocation?.Remove(0, 3),
+                                            //FanArtLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.FanArtLocation?.Remove(0, 3),
+                                            PosterFileLocation = movie.PosterFileLocation,
+                                            FanArtLocation = movie.FanArtLocation,
                                             MovieLocation = movieLocations[k],
                                             DateAdded = movie.DateAdded,
                                             Director = movie.Director

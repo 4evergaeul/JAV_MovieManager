@@ -584,3 +584,26 @@ export function updateUserSettings(userSettings) {
         console.log(error);
     });
 }
+
+export function getImage(imageType, id) {
+    return fetch("http://localhost:5100/images/getimage", {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify({
+            imageType: imageType,
+            id: id,
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(resp => {
+        if (!resp.ok) {
+            throw resp;
+        }
+        return resp.blob();
+    }).then(blob => {
+        return URL.createObjectURL(blob);
+    }).catch(error => {
+        console.log(error);
+    });
+}
