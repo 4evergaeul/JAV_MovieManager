@@ -27,26 +27,18 @@
 # 安装说明
 影片需要预先通过Movie_Data_Capture等刮削器取得元数据和影片封面图片。如果已有元数据，请直接从第二步开始阅读。
 ## 第一步：影片刮削
-下列步骤使用的刮削器为Movie_Data_Capture。原项目已商业化闭源，采用的是闭源前的版本。下载链接如下：https://github.com/4evergaeul/MovieManager/releases/download/v1/MDC.zip
+从7/12/2024开始，推荐刮削器换为[JavSP](https://github.com/Yuukiy/JavSP)。大家可以去原Repo下载，或使用和我配置一样的JavSP。下载链接如下。
+https://github.com/4evergaeul/JAV_MovieManager/releases/download/v1.3.1/JavSp.zip
 
 1.  清理影片名，让影片名的格式为：{番号名}-{序号} 或 {番号名}-{序号}-C。
-例如xxxx.com@ADN-566.mp4需要重命名为ADN-566.mp4，否则影片刮削器（下称MDC）无法识别。
+例如xxxx.com@ADN-566.mp4需要重命名为ADN-566.mp4，否则影片刮削器无法识别。
 
-2. 重命名完毕后，确认Movie_Data_Capture.exe,config.ini,和将要整理的影片在同一文件夹内。
+2. 重命名完毕后，确认JavSP.exe,config.ini,和将要整理的影片在同一文件夹内。
 ![](Readme/Picture5.png)
 
-3. 运行Movie_Data_Capture.exe,程序运行完毕后，影片将按照女优名分类放入JAV_output文件夹中。
+3. 运行JavSP.exe,程序运行完毕后，影片将按照女优名分类放入<b>#整理完成</b>文件夹中。
 
-4. 数据清理：不知道是不是JavDB数据的原因，刮削完成的数据(.nfo文件)有一些杂质，如下图
-![](Readme/Picture6.png)
-此时需要清理一下，推荐使用VisualStudio Code。使用Visual Studio Code，打开JAV_output文件夹。
-![](Readme/Picture7.png)
-4.1 按住Ctrl+Shift+H打开批量修改面板，搜索"<![CDATA["，然后点击"replace all"
-![](Readme/Picture8.png)
-4.2.之后再输入“]]>”，然后再点击"replace all"。
-4.3.再输入"分鐘"（清理nfo里runtime里的数据），然后点击"replace all"。至此，数据应该全部清洗完毕。
-
-5. 运行[男优刮削器](https://github.com/4evergaeul/AVDanyuScrapper)（AvdanyuScraper.exe，可选），选择JAV_output文件夹，等待刮削结束。
+4. 运行[男优刮削器](https://github.com/4evergaeul/AVDanyuScrapper)（AvdanyuScraper.exe，可选），选择<b>#整理完成</b>文件夹，等待刮削结束。
 
 此时数据整理完毕，之后可以把处理过后的文件夹全部移动到你的影片库位置。
 
