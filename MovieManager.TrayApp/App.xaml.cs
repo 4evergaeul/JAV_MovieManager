@@ -66,7 +66,84 @@ namespace MovieManager.TrayApp
             var initializingWindow = new InitializingWindow();
             initializingWindow.Show();
             Log.Information("Application is setting up...");
+
             // Start http-server.
+            //StartHttpServers();
+
+            // Start web app.
+            Log.Information("Starting web app...");
+            try
+            {
+                var webAppLocation = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppDirectory"];
+                var filename = "output.txt";
+                var filenameForRead = $"output_{DateTime.Now.ToString("MMddyyyy_hhmmss")}.txt";
+                var filePath = $@"{Environment.CurrentDirectory}\{filename}";
+                var filePathForRead = $@"{Environment.CurrentDirectory}\{filenameForRead}";
+                if (Directory.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + @$"serve {webAppLocation} > {filename}")
+                {
+                    RedirectStandardOutput = false,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                webAppProcess = Process.Start(webAppProcessInfo);
+                Thread.Sleep(1000);
+                File.Copy(filePath, filePathForRead);
+                using (var reader = new StreamReader(filePathForRead))
+                {
+
+                    var line = reader.ReadLine();
+                    while (string.IsNullOrEmpty(line))
+                    {
+                        line = reader.ReadLine();
+                    }
+                    string port = "";
+
+                    var match = Regex.Match(line, @"http:\/\/localhost:(\d+)");
+                    if (match != null)
+                    {
+                        if (match.Success)
+                        {
+                            port = match.Groups[1].Value;
+                        }
+                        if (port != "")
+                        {
+                            AppStaticProperties.WebAppHost = $"http://localhost:{port}";
+                            Log.Information($"Web App started at port {port}");
+                        }
+                        else
+                        {
+                            Log.Warning("Port not found in the output.");
+                        }
+                    }
+                    else
+                    {
+                        Log.Warning("Port not found in the output. Use 3000 as port for now.");
+                        AppStaticProperties.WebAppHost = $"http://localhost:3000";
+                    }
+
+                }
+                AppStaticProperties.WebAppHost = $"http://localhost:{3000}";
+                Thread.Sleep(1000);
+                File.Delete(filePathForRead);
+                Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occurs when starting web app. {ex.ToString()} ");
+                MessageBox.Show($"程序初始化失败，请联系开发者。错误信息：{ex.ToString()}");
+                CloseApp(true);
+            }
+            Log.Information("App started successfully!");
+            initializingWindow.Hide();
+            initializingWindow.Close();
+        }
+
+        private void StartHttpServers()
+        {
             Log.Information("Creating http-server for hosting media...");
             try
             {
@@ -89,7 +166,7 @@ namespace MovieManager.TrayApp
                             var disk = m.Substring(0, 1).Trim();
                             if (!AppStaticProperties.diskPortMappings.ContainsKey(disk))
                             {
-                                AppStaticMethods.CreateHttpServer(currentPort, disk);                             
+                                AppStaticMethods.CreateHttpServer(currentPort, disk);
                                 currentPort++;
                             }
                         }
@@ -135,84 +212,16 @@ namespace MovieManager.TrayApp
                 MessageBox.Show($"程序初始化失败，请联系开发者。错误信息：{ex.ToString()}");
                 CloseApp(true);
             }
-
-            // Start web app.
-            Log.Information("Starting web app...");
-            try
-            { 
-                var webAppLocation = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppDirectory"];
-                var filename = "output.txt";
-                var filenameForRead = $"output_{DateTime.Now.ToString("MMddyyyy_hhmmss")}.txt";
-                var filePath = $@"{Environment.CurrentDirectory}\{filename}";
-                var filePathForRead = $@"{Environment.CurrentDirectory}\{filenameForRead}";
-                if (Directory.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-                var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + @$"serve {webAppLocation} > {filename}")
-                {
-                    RedirectStandardOutput = false,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                webAppProcess = Process.Start(webAppProcessInfo);
-                Thread.Sleep(1000);
-                File.Copy(filePath, filePathForRead);
-                using (var reader = new StreamReader(filePathForRead))
-                {
-
-                    var line = reader.ReadLine();
-                    while(string.IsNullOrEmpty(line)) 
-                    {
-                        line = reader.ReadLine();
-                    }
-                    string port = "";
-
-                    var match = Regex.Match(line, @"http:\/\/localhost:(\d+)");
-                    if (match != null)
-                    {
-                        if (match.Success)
-                        {
-                            port = match.Groups[1].Value;
-                        }
-                        if (port != "")
-                        {
-                            AppStaticProperties.WebAppHost = $"http://localhost:{port}";
-                            Log.Information($"Web App started at port {port}");
-                        }
-                        else
-                        {
-                            Log.Warning("Port not found in the output.");
-                        }
-                    }
-                    else
-                    {
-                        Log.Warning("Port not found in the output. Use 3000 as port for now.");
-                        AppStaticProperties.WebAppHost = $"http://localhost:3000";
-                    }
-
-                }
-                AppStaticProperties.WebAppHost = $"http://localhost:{3000}";
-                Thread.Sleep(1000);
-                File.Delete(filePathForRead);
-                Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"An error occurs when starting web app. {ex.ToString()} ");
-                MessageBox.Show($"程序初始化失败，请联系开发者。错误信息：{ex.ToString()}");
-                CloseApp(true);
-            }
-            Log.Information("App started successfully!");
-            initializingWindow.Hide();
-            initializingWindow.Close();
         }
 
         private void CloseApp(bool forceShutdown = false)
         {
             var initializingWindow = new InitializingWindow();
             Log.Information("Application is closing...");
-            notifyIcon.Dispose(); //the icon would clean up automatically, but this is cleaner
+            if (notifyIcon != null)
+            {
+                notifyIcon.Dispose();
+            }
             if (webAppProcess != null)
             {
                 AppStaticMethods.KillProcessAndChildrens(webAppProcess.Id);
