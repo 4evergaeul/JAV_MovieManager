@@ -72,7 +72,7 @@ namespace MovieManager.BusinessLogic
             try
             {
                 var nfos = new List<string>();
-                var dirs = rootDirectory.Split(",");
+                var dirs = rootDirectory.Split("|");
                 foreach (var dir in dirs)
                 {
                     nfos = Directory.GetFiles(dir.Trim(), "*.nfo", SearchOption.AllDirectories).ToList();
@@ -80,7 +80,7 @@ namespace MovieManager.BusinessLogic
                     {
                         try
                         {
-                            var imdbId = Path.GetFileNameWithoutExtension(nfo).Split(' ')?[0];
+                            var imdbId = _xmlEngine.ParseXmlFile(nfo)?.Title?.Split(' ')?[0];                            
                             if(!string.IsNullOrEmpty(imdbId))
                             {
                                 imdbIds.Add(imdbId);

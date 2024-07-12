@@ -110,7 +110,7 @@ namespace MovieManager.BusinessLogic
             var moviesToRemove = new List<Movie>();
             using(var context = new DatabaseContext())
             {
-                moviesToRemove = context.Movies.Where(x => movies.Contains(x.ImdbId) == false).ToList();
+                moviesToRemove = context.Movies.Where(x => movies.Contains(x.ImdbId)).ToList();
                 DeleteMovies(moviesToRemove);
             }
             return moviesToRemove.Select(x => x.ImdbId).ToList();

@@ -65,7 +65,7 @@ namespace MovieManager.BusinessLogic
                 var newMovieDir = GetUserSettings().MovieDirectory;
                 var movieDirToRemove = new List<string>();
                 // Remove added movies from previous movie directories.
-                if (string.IsNullOrEmpty(prevMovieDir) && string.IsNullOrEmpty(newMovieDir))
+                if (!string.IsNullOrEmpty(prevMovieDir) && !string.IsNullOrEmpty(newMovieDir))
                 {
                     var preMovieDirs = prevMovieDir.Split("|");
                     var newMovieDirs = newMovieDir.Split("|");
