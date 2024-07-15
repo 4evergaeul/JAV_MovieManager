@@ -1,13 +1,10 @@
-﻿using Microsoft.Extensions.Options;
-using MovieManager.ClassLibrary;
+﻿using MovieManager.ClassLibrary;
 using MovieManager.ClassLibrary.RequestBody;
 using MovieManager.Data;
 using Serilog;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,12 +102,23 @@ namespace MovieManager.BusinessLogic
             }
         }
 
-        public List<string> DeleteRemovedMovies(List<string> movies)
+        public List<string> DeleteMoviesFromDirectory(List<string> movies)
         {
             var moviesToRemove = new List<Movie>();
             using(var context = new DatabaseContext())
             {
                 moviesToRemove = context.Movies.Where(x => movies.Contains(x.ImdbId)).ToList();
+                DeleteMovies(moviesToRemove);
+            }
+            return moviesToRemove.Select(x => x.ImdbId).ToList();
+        }
+
+        public List<string> DeleteNonExistentMovies(List<string> movies)
+        {
+            var moviesToRemove = new List<Movie>();
+            using (var context = new DatabaseContext())
+            {
+                moviesToRemove = context.Movies.Where(x => movies.Contains(x.ImdbId) == false).ToList();
                 DeleteMovies(moviesToRemove);
             }
             return moviesToRemove.Select(x => x.ImdbId).ToList();

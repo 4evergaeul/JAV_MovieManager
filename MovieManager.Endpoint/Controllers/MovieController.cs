@@ -172,8 +172,12 @@ namespace MovieManager.Endpoint.Controllers
         {
             var scanner = new FileScanner(_xmlProcessor);
             var movieDir = _config.GetUserSettings().MovieDirectory;
-            var m = scanner.ScanFilesForImdbId(movieDir);
-            return Ok(_movieService.DeleteRemovedMovies(m));
+            var m = new List<string>();
+            foreach (var md in movieDir)
+            {
+                m.AddRange(scanner.ScanFilesForImdbId(movieDir));
+            }
+            return Ok(_movieService.DeleteNonExistentMovies(m).Count);
         }
     }
 }

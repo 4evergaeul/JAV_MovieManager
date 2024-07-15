@@ -80,7 +80,7 @@ namespace MovieManager.BusinessLogic
                 foreach (var dir in movieDirToRemove)
                 { 
                     var scanner = new FileScanner(_xmlProcessor);
-                    _movieService.DeleteRemovedMovies(scanner.ScanFilesForImdbId(dir));
+                    _movieService.DeleteMoviesFromDirectory(scanner.ScanFilesForImdbId(dir));
                 }
                 
             }
@@ -158,7 +158,7 @@ namespace MovieManager.BusinessLogic
                     }
                 }// Remove movies
                 var scanner = new FileScanner(_xmlProcessor);
-                _movieService.DeleteRemovedMovies(scanner.ScanFilesForImdbId(GetUserSettings().MovieDirectory));
+                _movieService.DeleteMoviesFromDirectory(scanner.ScanFilesForImdbId(GetUserSettings().MovieDirectory));
             }
             catch(Exception ex)
             {
