@@ -17,6 +17,8 @@ using Serilog;
 using System.Linq.Expressions;
 using System.Windows.Controls;
 using MovieManager.BusinessLogic;
+using System.Net.Sockets;
+using System.Net;
 
 namespace MovieManager.TrayApp
 {
@@ -83,53 +85,32 @@ namespace MovieManager.TrayApp
                 {
                     File.Delete(filePath);
                 }
-                var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + @$"serve {webAppLocation} > {filename}")
+                var webAppStartPort = int.Parse(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppStartPort"]);
+                for (int port = webAppStartPort; port <= webAppStartPort + 100; port++)
                 {
-                    RedirectStandardOutput = false,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                webAppProcess = Process.Start(webAppProcessInfo);
-                Thread.Sleep(1000);
-                File.Copy(filePath, filePathForRead);
-                using (var reader = new StreamReader(filePathForRead))
-                {
-
-                    var line = reader.ReadLine();
-                    while (string.IsNullOrEmpty(line))
+                    Log.Information($"Trying to start the web app from port number {port}");
+                    if (IsPortAvailable(port))
                     {
-                        line = reader.ReadLine();
+                        Log.Information($"Starting the web app from port number {port}");
+                        var command = @$"set PORT={port} && serve {webAppLocation}";
+                        var webAppProcessInfo = new ProcessStartInfo("cmd.exe", "/K " + command)
+                        {
+                            RedirectStandardOutput = false,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        webAppProcess = Process.Start(webAppProcessInfo);
+                        Thread.Sleep(1000);
+                        AppStaticProperties.WebAppHost = $"http://localhost:{port}";
+                        Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
+                        break;
                     }
-                    string port = "";
-
-                    var match = Regex.Match(line, @"http:\/\/localhost:(\d+)");
-                    if (match != null)
+                    if (port == webAppStartPort + 100)
                     {
-                        if (match.Success)
-                        {
-                            port = match.Groups[1].Value;
-                        }
-                        if (port != "")
-                        {
-                            AppStaticProperties.WebAppHost = $"http://localhost:{port}";
-                            Log.Information($"Web App started at port {port}");
-                        }
-                        else
-                        {
-                            Log.Warning("Port not found in the output.");
-                        }
+                        Log.Error($"Unable to launch the web app from all posiable ports.");
+                        MessageBox.Show($"程序初始化失败，请联系开发者。");
                     }
-                    else
-                    {
-                        Log.Warning("Port not found in the output. Use 3000 as port for now.");
-                        AppStaticProperties.WebAppHost = $"http://localhost:3000";
-                    }
-
                 }
-                AppStaticProperties.WebAppHost = $"http://localhost:{3000}";
-                Thread.Sleep(1000);
-                File.Delete(filePathForRead);
-                Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
             }
             catch (Exception ex)
             {
@@ -194,17 +175,6 @@ namespace MovieManager.TrayApp
                         }
                     }
                 }
-
-
-                //for (char c = 'A'; c <= 'Z'; c++)
-                //{
-                //    var info = new ProcessStartInfo("cmd.exe", "/K " + $"http-server {c}:/ -p {currentPort}");
-                //    info.CreateNoWindow = true;
-                //    httpServerProcesses.Add(Process.Start(info));
-                //    Log.Information($"Created http-server for {c} drive at port {currentPort}");
-                //    Thread.Sleep(100);
-                //    currentPort++;
-                //}
             }
             catch (Exception ex)
             {
@@ -229,13 +199,13 @@ namespace MovieManager.TrayApp
             Log.Information("Web App shutdown.");
             foreach (var p in AppStaticProperties.portHttpServerProcessMappings.Values)
             {
-            
+
                 AppStaticMethods.KillProcessAndChildrens(p.Id);
             }
             Log.Information("Http-servers shutdown.");
             Log.Information("Application is closed.");
             Process.GetCurrentProcess().Kill();
-            if (forceShutdown) 
+            if (forceShutdown)
             {
                 Application.Current.Shutdown();
             }
@@ -246,6 +216,21 @@ namespace MovieManager.TrayApp
             var currentProcess = Process.GetCurrentProcess();
             var processes = Process.GetProcessesByName(currentProcess.ProcessName);
             return processes.Any(p => p.Id != currentProcess.Id);
+        }
+
+        private bool IsPortAvailable(int port)
+        {
+            try
+            {
+                TcpListener listener = new TcpListener(IPAddress.Any, port);
+                listener.Start();
+                listener.Stop();
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
         }
     }
 }
