@@ -29,7 +29,7 @@ namespace MovieManager.TrayApp
     {
         private TaskbarIcon notifyIcon;
         private Process webAppProcess;
-
+        private const string version = "JavMovieManager_07262024_1";
         public void Test() { }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -50,7 +50,7 @@ namespace MovieManager.TrayApp
                 .WriteTo.File($"logs/log_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt", flushToDiskInterval: TimeSpan.FromSeconds(1))
                 .CreateLogger();
 
-            Log.Information("Application starting up...");
+            Log.Information($"Application starting up...Current Version: {version}");
 
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
             Program.Run(null);
@@ -77,14 +77,6 @@ namespace MovieManager.TrayApp
             try
             {
                 var webAppLocation = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppDirectory"];
-                var filename = "output.txt";
-                var filenameForRead = $"output_{DateTime.Now.ToString("MMddyyyy_hhmmss")}.txt";
-                var filePath = $@"{Environment.CurrentDirectory}\{filename}";
-                var filePathForRead = $@"{Environment.CurrentDirectory}\{filenameForRead}";
-                if (Directory.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
                 var webAppStartPort = int.Parse(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["WebAppStartPort"]);
                 for (int port = webAppStartPort; port <= webAppStartPort + 100; port++)
                 {
