@@ -2,12 +2,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using MovieManager.BusinessLogic;
-using MovieManager.ClassLibrary;
-using MovieManager.ClassLibrary.Settings;
-using Serilog;
-using System;
+using System.IO;
 
 namespace MovieManager.Endpoint
 {
@@ -23,7 +21,6 @@ namespace MovieManager.Endpoint
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddOptions();
             services.AddControllers();
             services.AddTransient<MovieService>();
@@ -46,7 +43,11 @@ namespace MovieManager.Endpoint
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(env.ContentRootPath, "build"))
+            });
             app.UseRouting();
 
             app.UseAuthorization();
@@ -59,6 +60,7 @@ namespace MovieManager.Endpoint
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToFile("index.html");
             });
         }
     }

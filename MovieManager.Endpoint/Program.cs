@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using MovieManager.BusinessLogic;
+using Serilog;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows;
+using static System.Net.WebRequestMethods;
 
 namespace MovieManager.Endpoint
 {
@@ -34,8 +38,28 @@ namespace MovieManager.Endpoint
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var endpointHost = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["EndpointHost"];
-                    webBuilder.UseStartup<Startup>().UseUrls(endpointHost);
+                    try
+                    {
+                        Log.Information("Starting web app...");
+                        var endpointHost = int.Parse(new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("AppSettings")["EndpointHost"]);
+                        for (int port = endpointHost; port <= endpointHost; ++port)
+                        {
+                            Log.Information($"Trying to start the web app from port number {port}");
+                            if (AppStaticMethods.IsPortAvailable(port))
+                            {
+                                webBuilder.UseStartup<Startup>().UseUrls($"http://localhost:{port}");
+                                AppStaticProperties.WebAppHost = $@"http://localhost:{port}/index.html";
+                            }
+                        }
+                        Process.Start("explorer.exe", AppStaticProperties.WebAppHost);
+                        Log.Information("App started successfully!");
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error($"An error occurs when starting web app. {ex.ToString()} ");
+                        MessageBox.Show($"程序初始化失败，请联系开发者。错误信息：{ex.ToString()}");
+                        Application.Current.Shutdown();
+                    }
                 });
     }
 }

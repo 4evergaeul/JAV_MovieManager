@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using MovieManager.ClassLibrary.Settings;
-using Serilog;
+﻿using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace MovieManager.BusinessLogic
@@ -61,6 +60,21 @@ namespace MovieManager.BusinessLogic
                 {
                     KillProcessAndChildrens(Convert.ToInt32(mo["ProcessID"]));
                 }
+            }
+        }
+
+        public static bool IsPortAvailable(int port)
+        {
+            try
+            {
+                TcpListener listener = new TcpListener(IPAddress.Any, port);
+                listener.Start();
+                listener.Stop();
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
             }
         }
     }
