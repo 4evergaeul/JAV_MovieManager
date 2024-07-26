@@ -51,7 +51,7 @@ namespace MovieManager.BusinessLogic
                                 InsertMovie(context, movie);
                                 count++;
                                 status = "add";
-                                
+
                             }
                             else if (exisitingMovie != null)
                             {
@@ -60,17 +60,23 @@ namespace MovieManager.BusinessLogic
                                 exisitingMovie.Tags = context.MovieTags.Where(x => x.ImdbId == movie.ImdbId).Select(x => x.TagName).ToList();
                                 if (!string.IsNullOrEmpty(movie.DateAdded) && !string.IsNullOrEmpty(exisitingMovie.DateAdded))
                                 {
-                                    //|| (DateTime.Parse(movie.DateAdded) > DateTime.Parse(exisitingMovie.DateAdded))
-                                    if (CheckUpdate(movie,exisitingMovie) || forceUpdate)
+                                    if (CheckUpdate(movie, exisitingMovie) || forceUpdate)
                                     {
                                         UpdateMovie(context, movie, exisitingMovie);
                                         status = "update";
                                         Log.Information($"Updating {movie.ImdbId} data...");
                                         count++;
                                     }
+                                    else
+                                    {
+                                        Log.Debug($"No changes found in Movie: {movie.ImdbId}.");
+                                    }
                                 }
                             }
-                            context.SaveChanges();
+                            if (status == "add" || status == "update")
+                            {
+                                context.SaveChanges();
+                            }
                             switch (status)
                             {
                                 case "add":
@@ -80,7 +86,7 @@ namespace MovieManager.BusinessLogic
                                     Log.Debug($"Movie: {movie.ImdbId} has been updated.");
                                     break;
                                 case "":
-                                    Log.Debug($"No Changes on {movie.ImdbId}");
+                                    Log.Debug($"Skiped {movie.ImdbId}");
                                     break;
                             }
                         }
@@ -540,33 +546,18 @@ namespace MovieManager.BusinessLogic
                                
                                 var movieLocations = movie.MovieLocation.Split('|');
                                 var movieClips = new List<MovieViewModel>();
-                                for (int k = 0; k < movieLocations.Length; k++)
+                                if (movieLocations?.Length > 0)
                                 {
-                                    if (!string.IsNullOrEmpty(movieLocations[k]))
+                                    movieClips.Add(new MovieViewModel()
                                     {
-                                        var title = string.Empty;
-                                        if (k == 0)
-                                        {
-                                            title = movie.Title;
-                                        }
-                                        else
-                                        {
-                                            title = $"{movie.Title}-cd{k}";
-                                        }
-                                        movieClips.Add(new MovieViewModel()
-                                        {
-                                            ImdbId = movie.ImdbId,
-                                            Title = title,
-                                            // Commented for deprecating http-server.
-                                            //PosterFileLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.PosterFileLocation?.Remove(0, 3),
-                                            //FanArtLocation = AppStaticMethods.GetDiskPort(movie.PosterFileLocation?.Substring(0, 1)) + movie.FanArtLocation?.Remove(0, 3),
-                                            PosterFileLocation = movie.PosterFileLocation,
-                                            FanArtLocation = movie.FanArtLocation,
-                                            MovieLocation = movieLocations[k],
-                                            DateAdded = movie.DateAdded,
-                                            Director = movie.Director
-                                        });
-                                    }
+                                        ImdbId = movie.ImdbId,
+                                        Title = movie.Title,
+                                        PosterFileLocation = movie.PosterFileLocation,
+                                        FanArtLocation = movie.FanArtLocation,
+                                        MovieLocation = movie.MovieLocation,
+                                        DateAdded = movie.DateAdded,
+                                        Director = movie.Director
+                                    });
                                 }
                                 results.AddRange(movieClips);
                             }

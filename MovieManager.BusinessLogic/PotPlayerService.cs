@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace MovieManager.BusinessLogic
 {
@@ -20,9 +21,13 @@ namespace MovieManager.BusinessLogic
 
         public void BuildPlayList(string playListName, string path, List<PlayListItem> movies, FileMode fileMode = FileMode.Create)
         {
+            if (playListName.Contains("undefined"))
+            { 
+                playListName = playListName.Replace("undefined", $"{DateTime.Now.ToString("yyyyMMdd_hhmmss")}");
+            }
             try
             {
-                var movieLocations = movies.Select(x => x.MovieLocation).ToList();
+                var movieLocations = movies.Select(x => x.MovieLocation.Split("|").Where(x => !string.IsNullOrEmpty(x)).ToList()).ToList();
                 var imdbIds = movies.Select(x => x.ImdbId).ToList();
                 var fs = new FileStream($"{path}\\{playListName.Replace(":", "-")}.dpl", fileMode);
                 using(var writer = new StreamWriter(fs))
@@ -32,9 +37,14 @@ namespace MovieManager.BusinessLogic
                         var defaultInput = "DAUMPLAYLIST\nplaytime=0\ntopindex=0\nfoldertype=2\nsaveplaypos=0\n";
                         writer.WriteLine(defaultInput);
                     }
+                    var count = 1;
                     for (int i = 0; i < movieLocations.Count; i++)
-                    {
-                        writer.WriteLine($"{i + 1}*file*{movieLocations[i]}");
+                    {                        
+                        foreach (var movieLocation in movieLocations[i]) 
+                        {
+                            var l = $"{count++}*file*{movieLocation}";
+                            writer.WriteLine(l);
+                        }
                     }
                 }
                 using(var context = new DatabaseContext())
@@ -69,11 +79,11 @@ namespace MovieManager.BusinessLogic
                     foreach (var m in movies)
                     {
                         var imdbId = m.ImdbId;
-                        var movieLocation = m.MovieLocation;
-                        if (!string.IsNullOrEmpty(imdbId) && !imdbIds.Contains(imdbId))
+                        var currentMovies = m.MovieLocation.Split("|").Where(x => !string.IsNullOrEmpty(x)).ToList();
+                        if (!string.IsNullOrEmpty(imdbId) && !imdbIds.Contains(imdbId) && currentMovies.Count > 0)
                         {
                             imdbIds.Add(imdbId);
-                            movieLocations.Add(movieLocation);
+                            movieLocations.AddRange(currentMovies);
                         }
                     }
                 }
