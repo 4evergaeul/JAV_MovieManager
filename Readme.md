@@ -115,9 +115,7 @@ MovieManager_{MMddyyyy}_{hhmmss}
 
 ### 参数
 参数位于appsettings.json文件内。下面是各个参数的解释：
-- WebAppDirectory：R放置eact的生成文件的文件夹。
 - EndpointHost：后端API的端口，如果要更改为其他则需要更改并重新build前端项目。
-- HttpServerStartPort：HttpServer是一个Node组件，用于映射本地的文件夹到一个ip地址，以用于前端文件访问本地媒体文件。这个端口用于设置起始的盘符端口（A盘对应8100，B盘对应8101，C盘对应8102，以此类推）。更改此端口不需要重新部署项目。
 
 ### Loggings
 项目使用的时Serilog的loggings库，log文件build的文件夹下。
