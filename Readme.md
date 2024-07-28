@@ -45,26 +45,21 @@ https://github.com/4evergaeul/JAV_MovieManager/releases/download/v1.3.1/JavSp.zi
 此时数据整理完毕，之后可以把处理过后的文件夹全部移动到你的影片库位置。
 
 ## 第二步：安装软件
-1. 下载安装[.NET SDK](https://download.visualstudio.microsoft.com/download/pr/b70ad520-0e60-43f5-aee2-d3965094a40d/667c122b3736dcbfa1beff08092dbfc3/dotnet-sdk-3.1.426-win-x64.exe), [Node.js](https://nodejs.org/dist/v20.15.0/node-v20.15.0-x64.msi), [Potplayer](https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe)
+1. 下载安装[.NET SDK](https://download.visualstudio.microsoft.com/download/pr/b70ad520-0e60-43f5-aee2-d3965094a40d/667c122b3736dcbfa1beff08092dbfc3/dotnet-sdk-3.1.426-win-x64.exe), [Potplayer](https://t1.daumcdn.net/potplayer/PotPlayer/Version/Latest/PotPlayerSetup64.exe)
 
 2. 运行dotnet-sdk-3.1.426-win-x64.exe，并完成安装。这个是.NET Core 3.1的SDK，也将用于该程序的后端。
 
-3. 打开cmd，运行如下
-```
-npm install --global serve
-```
+3. 安装PotPlayerSetup6,建议使用默认安装位置 ```C:\Program Files\``` 以便之后无需重新在软件内配置。
 
-4. 安装PotPlayerSetup6,建议使用默认安装位置 ```C:\Program Files\``` 以便之后无需重新在软件内配置。
+4.  在一切安装完毕后，即可以解压MovieManager。双击"MovieManager.TrayApp.exe"运行。此时会弹窗“程序正在初始化”，请等待大约10-30秒。
 
-5.  在一切安装完毕后，即可以解压MovieManager。双击"MovieManager.TrayApp.exe"运行。此时会弹窗“程序正在初始化”，请等待大约10-30秒。
-
-6. 程序初始化完毕后，弹窗会自动关闭，并且程序会用默认浏览器打开。并且程序也会出现在<b>屏幕右下角的托盘图标中</b>，如下图。
+5. 程序初始化完毕后，弹窗会自动关闭，并且程序会用默认浏览器打开。并且程序也会出现在<b>屏幕右下角的托盘图标中</b>，如下图。
 ![](Readme/Picture9.png)
 
-7. 右键图标，点击"打开"。这个时候默认浏览器会打开影片管理器。点击<b>设置</b>。
+6. 右键图标，点击"打开"。这个时候默认浏览器会打开影片管理器。点击<b>设置</b>。
 ![](Readme/Picture10.png)
 
-8.  下面是设置表格的介绍：
+7.  下面是设置表格的介绍：
 <b>（必须）</b> “文件夹”： 设置为你的影片目录（需要手动输入，或把地址复制粘贴过去）。e.g.``` J:\MyFile\New\有码\演员```。<br>
 如果需要测试，可以在文件夹下找到TestingMovieLib，把该文件夹设置为影片目录即可。<br>
 演员头像库请从该库下载：https://github.com/gfriends/gfriends<br>
@@ -74,7 +69,7 @@ npm install --global serve
 “扫描多少天内加的电影”：如果这里的数值设为<b>-1</b>，则搜索所有电影。<br>
 ![](Readme/Picture11.png)
 
-9. 在一切配置完成后，点击“保存设置”->“添加新电影”。 程序就会开始构建影片库，这个时长会根据你影片数量而定。影片库构建完成后页面会刷新并返回电影页面。（如果点击保存设置后，程序未能立刻保存，说明后端程序没有正常运行，右键点击托盘栏图标并点击退出，重新运行程序即可）
+8. 在一切配置完成后，点击“保存设置”->“添加新电影”。 程序就会开始构建影片库，这个时长会根据你影片数量而定。影片库构建完成后页面会刷新并返回电影页面。（如果点击保存设置后，程序未能立刻保存，说明后端程序没有正常运行，右键点击托盘栏图标并点击退出，重新运行程序即可）
 
 
 配置完成后类似下图。
