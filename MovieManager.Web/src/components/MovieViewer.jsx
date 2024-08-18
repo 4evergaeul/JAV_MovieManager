@@ -41,6 +41,7 @@ const MovieViewer = forwardRef((props, ref) => {
         setIsLoading(false);
         setQuerySearchBtnVisible(searchType === "Title" ? true : false);
         if(pageRoot === "") {
+            let today = new Date();
             pageRoot = `Playlist_${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}-${today.getHours()}${today.getMinutes()}${today.getSeconds()}`;
         }
         setPageRoot(pageRoot);

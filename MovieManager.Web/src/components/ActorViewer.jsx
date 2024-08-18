@@ -83,7 +83,7 @@ const ActorViewer = forwardRef((props, ref) => {
             movieViewer?.current.setIsLoading();
             setLikeFlag(resp[0].liked);
             getMoivesByFilter(0, [resp[0].name], false).then(resp => {
-                movieViewer?.current.initializeMovies(resp, 5, actorNames[actorIndex]);
+                movieViewer?.current.initializeMovies(resp, 5, currentPageActorCardDetails[actorIndex].name);
             });
         }).catch((error) => {
             console.log(error);
