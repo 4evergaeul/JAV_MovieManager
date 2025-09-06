@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MovieManager.BusinessLogic
@@ -116,6 +117,16 @@ namespace MovieManager.BusinessLogic
                     if (movie != null)
                     {
                         var imdb = movie.Title.Split(' ')?[0];
+                        var regex = new Regex(@"^[A-Z]{4}-\d{3,}$");
+                        if (string.IsNullOrEmpty(imdb) || !regex.IsMatch(imdb))
+                        {
+                            regex = new Regex(@"[A-Z]{3,5}-\d{2,5}");
+                            var match = regex.Match(movie.Title);
+                            if (match.Success)
+                            {
+                                imdb = match.Value;
+                            }
+                        }
                         if (!string.IsNullOrEmpty(imdb))
                         {
                             // Update movie locations
